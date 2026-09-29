@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futebol de Botão Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Menu Screen -->
+    <div id="menu-screen" class="screen active">
+      <div class="menu-container">
+        <div class="logo">
+          <div class="logo-icon">⚽</div>
+          <h1>Futebol de Botão</h1>
+          <p class="subtitle">Online Arena</p>
+        </div>
+        <div class="menu-options">
+          <button class="menu-btn" data-mode="1v1">
+            <span class="mode-icon">👤</span>
+            <span class="mode-info">
+              <span class="mode-name">1 vs 1</span>
+              <span class="mode-desc">3 botões por time</span>
+            </span>
+          </button>
+          <button class="menu-btn" data-mode="2v2">
+            <span class="mode-icon">👥</span>
+            <span class="mode-info">
+              <span class="mode-name">2 vs 2</span>
+              <span class="mode-desc">5 botões por time</span>
+            </span>
+          </button>
+          <button class="menu-btn" data-mode="3v3">
+            <span class="mode-icon">👥</span>
+            <span class="mode-info">
+              <span class="mode-name">3 vs 3</span>
+              <span class="mode-desc">7 botões por time</span>
+            </span>
+          </button>
+        </div>
+        <div class="menu-footer">
+          <p>Clique em um botão do seu time para lançar!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Select Screen -->
+    <div id="team-select-screen" class="screen">
+      <div class="team-select-container">
+        <h2>Escolha os Times</h2>
+        <div class="team-selectors">
+          <div class="team-selector" id="team1-selector">
+            <h3>Time 1 (Vermelho)</h3>
+            <div class="team-grid" id="team1-grid"></div>
+          </div>
+          <div class="vs-divider">VS</div>
+          <div class="team-selector" id="team2-selector">
+            <h3>Time 2 (Azul)</h3>
+            <div class="team-grid" id="team2-grid"></div>
+          </div>
+        </div>
+        <div class="team-select-actions">
+          <button class="btn btn-secondary" id="btn-back-menu">Voltar</button>
+          <button class="btn btn-primary" id="btn-start-game">Iniciar Jogo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <div class="score-panel">
+          <div class="team-score team1-score">
+            <span class="team-name" id="team1-name">Time 1</span>
+            <span class="score" id="score1">0</span>
+          </div>
+          <div class="game-info">
+            <span class="timer" id="timer">05:00</span>
+            <span class="turn-indicator" id="turn-indicator">Vez do Time 1</span>
+          </div>
+          <div class="team-score team2-score">
+            <span class="team-name" id="team2-name">Time 2</span>
+            <span class="score" id="score2">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="canvas-wrapper">
+        <canvas id="game-canvas"></canvas>
+        <div class="power-bar-container" id="power-bar-container" style="display:none;">
+          <div class="power-bar">
+            <div class="power-fill" id="power-fill"></div>
+          </div>
+          <span class="power-label">Força</span>
+        </div>
+      </div>
+      <div class="game-controls">
+        <button class="btn btn-small" id="btn-pause">⏸ Pausar</button>
+        <button class="btn btn-small" id="btn-quit">✕ Sair</button>
+      </div>
+    </div>
+
+    <!-- Goal Overlay -->
+    <div id="goal-overlay" class="overlay" style="display:none;">
+      <div class="goal-text">
+        <span class="goal-word">GOOOL!</span>
+        <span class="goal-team" id="goal-team"></span>
+      </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="screen">
+      <div class="gameover-container">
+        <h2 id="gameover-title">Fim de Jogo!</h2>
+        <div class="final-score">
+          <span class="final-team" id="final-team1">Time 1</span>
+          <span class="final-vs">
+            <span id="final-score1">0</span> - <span id="final-score2">0</span>
+          </span>
+          <span class="final-team" id="final-team2">Time 2</span>
+        </div>
+        <div class="gameover-actions">
+          <button class="btn btn-primary" id="btn-rematch">Revanche</button>
+          <button class="btn btn-secondary" id="btn-main-menu">Menu Principal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pause Overlay -->
+    <div id="pause-overlay" class="overlay" style="display:none;">
+      <div class="pause-content">
+        <h2>Jogo Pausado</h2>
+        <button class="btn btn-primary" id="btn-resume">▶ Continuar</button>
+        <button class="btn btn-secondary" id="btn-quit-pause">✕ Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/teams.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

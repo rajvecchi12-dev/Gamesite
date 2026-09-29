@@ -1,0 +1,501 @@
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2235;
+  --text-primary: #f0f4ff;
+  --text-secondary: #8b9bc0;
+  --accent-red: #ef4444;
+  --accent-red-glow: #ef444466;
+  --accent-blue: #3b82f6;
+  --accent-blue-glow: #3b82f666;
+  --accent-green: #22c55e;
+  --accent-gold: #f59e0b;
+  --field-green: #1b7a2d;
+  --field-green-light: #22962e;
+  --field-line: rgba(255,255,255,0.7);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+h1, h2, h3 {
+  font-family: 'Russo One', sans-serif;
+}
+
+.screen {
+  display: none;
+  position: absolute;
+  inset: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* ---- Menu ---- */
+.menu-container {
+  text-align: center;
+  max-width: 480px;
+  width: 90%;
+}
+
+.logo {
+  margin-bottom: 48px;
+}
+
+.logo-icon {
+  font-size: 64px;
+  margin-bottom: 8px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.logo h1 {
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-top: 4px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.menu-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 20px 24px;
+  background: var(--bg-card);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.menu-btn:hover {
+  border-color: var(--accent-green);
+  background: #1e2d40;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(34,197,94,0.15);
+}
+
+.mode-icon {
+  font-size: 2rem;
+  width: 48px;
+  text-align: center;
+}
+
+.mode-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.mode-name {
+  font-family: 'Russo One', sans-serif;
+  font-size: 1.3rem;
+}
+
+.mode-desc {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.menu-footer {
+  margin-top: 40px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* ---- Team Select ---- */
+.team-select-container {
+  max-width: 800px;
+  width: 95%;
+  text-align: center;
+}
+
+.team-select-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+}
+
+.team-selectors {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.team-selector {
+  flex: 1;
+  min-width: 240px;
+  max-width: 340px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.team-selector h3 {
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+#team1-selector h3 { color: var(--accent-red); }
+#team2-selector h3 { color: var(--accent-blue); }
+
+.vs-divider {
+  font-family: 'Russo One', sans-serif;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  align-self: center;
+  padding: 0 8px;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.team-option {
+  padding: 10px 6px;
+  background: var(--bg-secondary);
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  font-family: inherit;
+  color: var(--text-primary);
+  font-size: 0.75rem;
+}
+
+.team-option:hover {
+  border-color: var(--accent-gold);
+}
+
+.team-option.selected {
+  border-color: var(--accent-green);
+  background: rgba(34,197,94,0.15);
+}
+
+.team-option .team-flag {
+  font-size: 1.5rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.team-select-actions {
+  margin-top: 32px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Russo One', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-green), #16a34a);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34,197,94,0.3);
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid #334155;
+}
+
+.btn-secondary:hover {
+  background: #243044;
+}
+
+.btn-small {
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid #334155;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btn-small:hover {
+  background: #243044;
+}
+
+/* ---- Game Screen ---- */
+#game-screen {
+  flex-direction: column;
+}
+
+.game-header {
+  width: 100%;
+  padding: 8px 16px;
+}
+
+.score-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.team-score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-name {
+  font-family: 'Russo One', sans-serif;
+  font-size: 0.9rem;
+}
+
+.team1-score .team-name { color: var(--accent-red); }
+.team2-score .team-name { color: var(--accent-blue); }
+
+.score {
+  font-family: 'Russo One', sans-serif;
+  font-size: 2rem;
+  min-width: 40px;
+  text-align: center;
+}
+
+.team1-score .score { color: var(--accent-red); }
+.team2-score .score { color: var(--accent-blue); }
+
+.game-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.timer {
+  font-family: 'Russo One', sans-serif;
+  font-size: 1.4rem;
+  color: var(--accent-gold);
+}
+
+.turn-indicator {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: 2px 12px;
+  background: var(--bg-card);
+  border-radius: 20px;
+}
+
+.canvas-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+}
+
+#game-canvas {
+  border-radius: var(--radius);
+  box-shadow: 0 0 40px rgba(0,0,0,0.5);
+}
+
+.power-bar-container {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.7);
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.power-bar {
+  width: 160px;
+  height: 12px;
+  background: #333;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.power-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-green), var(--accent-gold), var(--accent-red));
+  border-radius: 6px;
+  transition: width 0.05s;
+}
+
+.power-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.game-controls {
+  padding: 8px 16px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ---- Overlays ---- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.goal-text {
+  text-align: center;
+  animation: goalPop 0.5s ease-out;
+}
+
+@keyframes goalPop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.goal-word {
+  display: block;
+  font-family: 'Russo One', sans-serif;
+  font-size: 5rem;
+  background: linear-gradient(135deg, var(--accent-gold), #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+}
+
+.goal-team {
+  display: block;
+  font-family: 'Russo One', sans-serif;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.pause-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.pause-content h2 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+/* ---- Game Over ---- */
+.gameover-container {
+  text-align: center;
+  max-width: 480px;
+  width: 90%;
+}
+
+.gameover-container h2 {
+  font-size: 2.2rem;
+  margin-bottom: 32px;
+}
+
+.final-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.final-team {
+  font-family: 'Russo One', sans-serif;
+  font-size: 1.2rem;
+}
+
+.final-vs {
+  font-family: 'Russo One', sans-serif;
+  font-size: 3rem;
+  color: var(--accent-gold);
+}
+
+.gameover-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  .logo h1 { font-size: 1.6rem; }
+  .logo-icon { font-size: 48px; }
+  .menu-btn { padding: 16px 18px; }
+  .mode-name { font-size: 1.1rem; }
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
+  .score-panel { gap: 12px; }
+  .team-name { font-size: 0.75rem; }
+  .score { font-size: 1.5rem; }
+  .timer { font-size: 1.1rem; }
+  .goal-word { font-size: 3rem; }
+  .final-vs { font-size: 2rem; }
+}
