@@ -99,7 +99,7 @@ h1, h2, h3 { font-family: 'Russo One', system-ui, sans-serif; }
 .btn-small:hover { background: #243044; }
 
 #game-screen { flex-direction: column; }
-.game-header { width: 100%; padding: 8px 16px; }
+.game-header { width: 100%; padding: 4px 16px; }
 .score-panel { display: flex; align-items: center; justify-content: center; gap: 24px; max-width: 600px; margin: 0 auto; }
 .team-score { display: flex; align-items: center; gap: 10px; }
 .team-name { font-family: 'Russo One', system-ui, sans-serif; font-size: 0.9rem; }
@@ -112,14 +112,14 @@ h1, h2, h3 { font-family: 'Russo One', system-ui, sans-serif; }
 .timer { font-family: 'Russo One', system-ui, sans-serif; font-size: 1.4rem; color: var(--accent-gold); }
 .turn-indicator { font-size: 0.75rem; color: var(--text-secondary); padding: 2px 12px; background: var(--bg-card); border-radius: 20px; }
 
-.canvas-wrapper { position: relative; flex: 1; display: flex; justify-content: center; align-items: center; padding: 8px; min-height: 0; }
+.canvas-wrapper { position: relative; flex: 1; display: flex; justify-content: center; align-items: center; padding: 4px; min-height: 0; overflow: hidden; }
 #game-canvas { border-radius: var(--radius); box-shadow: 0 0 40px rgba(0,0,0,0.5); display: block; }
 
 .power-bar-container { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.7); padding: 8px 16px; border-radius: 20px; }
 .power-bar { width: 160px; height: 12px; background: #333; border-radius: 6px; overflow: hidden; }
 .power-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-green), var(--accent-gold), var(--accent-red)); border-radius: 6px; transition: width 0.05s; }
 .power-label { font-size: 0.75rem; color: var(--text-secondary); }
-.game-controls { padding: 8px 16px; display: flex; justify-content: center; gap: 12px; }
+.game-controls { padding: 4px 16px; display: flex; justify-content: center; gap: 12px; }
 
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 100; }
 .goal-text { text-align: center; animation: goalPop 0.5s ease-out; }
@@ -169,7 +169,7 @@ h1, h2, h3 { font-family: 'Russo One', system-ui, sans-serif; }
             <span class="mode-icon">👤</span>
             <span class="mode-info">
               <span class="mode-name">1 vs 1</span>
-              <span class="mode-desc">3 botões por time</span>
+              <span class="mode-desc">1 botão por time</span>
             </span>
           </button>
           <button class="menu-btn" data-mode="2v2">
@@ -295,7 +295,7 @@ const TEAMS = [
 ];
 
 const MODE_CONFIG = {
-  '1v1': { players: 3, label: '1 vs 1' },
+  '1v1': { players: 1, label: '1 vs 1' },
   '2v2': { players: 5, label: '2 vs 2' },
   '3v3': { players: 7, label: '3 vs 3' },
 };
@@ -317,14 +317,14 @@ class PhysicsBody {
     this.vel = new Vec2();
     this.radius = radius;
     this.mass = mass || 1;
-    this.friction = 0.985;
+    this.friction = 0.97;
   }
   update(dt) {
     this.pos = this.pos.add(this.vel.scale(dt));
     this.vel = this.vel.scale(this.friction);
-    if (this.vel.len() < 0.3) this.vel = new Vec2();
+    if (this.vel.len() < 0.15) this.vel = new Vec2();
   }
-  isMoving() { return this.vel.len() > 0.3; }
+  isMoving() { return this.vel.len() > 0.15; }
 }
 
 class PhysicsEngine {
@@ -359,7 +359,7 @@ class PhysicsEngine {
     b.pos = b.pos.add(n.scale(overlap * (a.mass / tm)));
     const rv = a.vel.sub(b.vel).dot(n);
     if (rv > 0) return;
-    const imp = -(1 + 0.8) * rv / tm;
+    const imp = -(1 + 0.6) * rv / tm;
     a.vel = a.vel.add(n.scale(imp * b.mass));
     b.vel = b.vel.sub(n.scale(imp * a.mass));
   }
@@ -422,10 +422,10 @@ class Game {
     this.team1Data = t1;
     this.team2Data = t2;
     this.numPlayers = MODE_CONFIG[mode].players;
-    this.BUTTON_RADIUS = 18;
-    this.BALL_RADIUS = 10;
-    this.GOAL_DEPTH = 30;
-    this.SHOOT_FORCE = 18;
+    this.BUTTON_RADIUS = 22;
+    this.BALL_RADIUS = 12;
+    this.GOAL_DEPTH = 36;
+    this.SHOOT_FORCE = 10;
     this.score = [0, 0];
     this.currentTeam = 1;
     this.state = 'waiting';
@@ -451,9 +451,9 @@ class Game {
 
   resize() {
     const wr = this.canvas.parentElement;
-    const mW = wr.clientWidth - 16;
-    const mH = wr.clientHeight - 16;
-    const asp = 3 / 2;
+    const mW = wr.clientWidth - 4;
+    const mH = wr.clientHeight - 4;
+    const asp = 16 / 9;
     let w, h;
     if (mW / mH > asp) { h = mH; w = h * asp; } else { w = mW; h = w / asp; }
     this.fieldW = Math.floor(w);
@@ -466,8 +466,8 @@ class Game {
 
   initPhysics() {
     this.physics = new PhysicsEngine(this.fieldW, this.fieldH, this.goalDepth, this.goalH);
-    this.ball = new PhysicsBody(this.fieldW / 2, this.fieldH / 2, this.BALL_RADIUS, 0.5);
-    this.ball.friction = 0.99;
+    this.ball = new PhysicsBody(this.fieldW / 2, this.fieldH / 2, this.BALL_RADIUS, 0.4);
+    this.ball.friction = 0.975;
     this.physics.setBall(this.ball);
   }
 
@@ -487,15 +487,23 @@ class Game {
   getFormation(team) {
     const n = this.numPlayers, w = this.fieldW, h = this.fieldH, pos = [];
     if (team === 1) {
-      pos.push({x:w*0.08,y:h*0.5});
-      if (n>=3) { pos.push({x:w*0.2,y:h*0.35}); pos.push({x:w*0.2,y:h*0.65}); }
-      if (n>=5) { pos.push({x:w*0.35,y:h*0.3}); pos.push({x:w*0.35,y:h*0.7}); }
-      if (n>=7) { pos.push({x:w*0.45,y:h*0.4}); pos.push({x:w*0.45,y:h*0.6}); }
+      if (n===1) {
+        pos.push({x:w*0.25,y:h*0.5});
+      } else {
+        pos.push({x:w*0.08,y:h*0.5});
+        if (n>=3) { pos.push({x:w*0.2,y:h*0.35}); pos.push({x:w*0.2,y:h*0.65}); }
+        if (n>=5) { pos.push({x:w*0.35,y:h*0.3}); pos.push({x:w*0.35,y:h*0.7}); }
+        if (n>=7) { pos.push({x:w*0.45,y:h*0.4}); pos.push({x:w*0.45,y:h*0.6}); }
+      }
     } else {
-      pos.push({x:w*0.92,y:h*0.5});
-      if (n>=3) { pos.push({x:w*0.8,y:h*0.35}); pos.push({x:w*0.8,y:h*0.65}); }
-      if (n>=5) { pos.push({x:w*0.65,y:h*0.3}); pos.push({x:w*0.65,y:h*0.7}); }
-      if (n>=7) { pos.push({x:w*0.55,y:h*0.4}); pos.push({x:w*0.55,y:h*0.6}); }
+      if (n===1) {
+        pos.push({x:w*0.75,y:h*0.5});
+      } else {
+        pos.push({x:w*0.92,y:h*0.5});
+        if (n>=3) { pos.push({x:w*0.8,y:h*0.35}); pos.push({x:w*0.8,y:h*0.65}); }
+        if (n>=5) { pos.push({x:w*0.65,y:h*0.3}); pos.push({x:w*0.65,y:h*0.7}); }
+        if (n>=7) { pos.push({x:w*0.55,y:h*0.4}); pos.push({x:w*0.55,y:h*0.6}); }
+      }
     }
     return pos;
   }
@@ -559,7 +567,7 @@ class Game {
     const diff = this.aimStart.sub(this.aimEnd);
     const force = Math.min(diff.len() / 150, 1) * this.SHOOT_FORCE;
     if (force > 0.5) {
-      this.selectedButton.vel = diff.norm().scale(force * 60);
+      this.selectedButton.vel = diff.norm().scale(force * 30);
       this.state = 'animating';
     } else {
       this.state = 'waiting';
@@ -584,7 +592,7 @@ class Game {
     }
 
     if (this.state === 'animating') {
-      this.physics.update(dt * 60);
+      this.physics.update(dt * 40);
       const gs = this.physics.checkGoal();
       if (gs > 0) {
         this.score[gs-1]++;
