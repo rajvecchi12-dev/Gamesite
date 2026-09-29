@@ -2,15 +2,161 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Futebol de Botão Online</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2235;
+  --text-primary: #f0f4ff;
+  --text-secondary: #8b9bc0;
+  --accent-red: #ef4444;
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-gold: #f59e0b;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+h1, h2, h3 { font-family: 'Russo One', system-ui, sans-serif; }
+
+.screen {
+  display: none;
+  position: absolute;
+  inset: 0;
+  justify-content: center;
+  align-items: center;
+}
+.screen.active { display: flex; }
+
+.menu-container { text-align: center; max-width: 480px; width: 90%; }
+.logo { margin-bottom: 48px; }
+.logo-icon { font-size: 64px; margin-bottom: 8px; animation: bounce 2s ease-in-out infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.logo h1 {
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-green));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-top: 4px; letter-spacing: 4px; text-transform: uppercase; }
+.menu-options { display: flex; flex-direction: column; gap: 16px; }
+
+.menu-btn {
+  display: flex; align-items: center; gap: 16px; width: 100%;
+  padding: 20px 24px; background: var(--bg-card); border: 2px solid transparent;
+  border-radius: var(--radius); color: var(--text-primary); cursor: pointer;
+  transition: all 0.2s; font-family: inherit;
+}
+.menu-btn:hover { border-color: var(--accent-green); background: #1e2d40; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(34,197,94,0.15); }
+.mode-icon { font-size: 2rem; width: 48px; text-align: center; }
+.mode-info { display: flex; flex-direction: column; align-items: flex-start; }
+.mode-name { font-family: 'Russo One', system-ui, sans-serif; font-size: 1.3rem; }
+.mode-desc { color: var(--text-secondary); font-size: 0.85rem; }
+.menu-footer { margin-top: 40px; color: var(--text-secondary); font-size: 0.85rem; }
+
+.team-select-container { max-width: 800px; width: 95%; text-align: center; max-height: 95vh; overflow-y: auto; }
+.team-select-container h2 { font-size: 1.8rem; margin-bottom: 24px; }
+.team-selectors { display: flex; gap: 16px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+.team-selector { flex: 1; min-width: 240px; max-width: 340px; background: var(--bg-card); border-radius: var(--radius); padding: 20px; }
+.team-selector h3 { margin-bottom: 16px; font-size: 1rem; }
+#team1-selector h3 { color: var(--accent-red); }
+#team2-selector h3 { color: var(--accent-blue); }
+.vs-divider { font-family: 'Russo One', system-ui, sans-serif; font-size: 1.5rem; color: var(--text-secondary); align-self: center; padding: 0 8px; }
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.team-option {
+  padding: 10px 6px; background: var(--bg-secondary); border: 2px solid transparent;
+  border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s;
+  text-align: center; font-family: inherit; color: var(--text-primary); font-size: 0.75rem;
+}
+.team-option:hover { border-color: var(--accent-gold); }
+.team-option.selected { border-color: var(--accent-green); background: rgba(34,197,94,0.15); }
+.team-option .team-flag { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+.team-select-actions { margin-top: 32px; display: flex; gap: 12px; justify-content: center; padding-bottom: 16px; }
+
+.btn { padding: 14px 32px; border: none; border-radius: var(--radius-sm); font-family: 'Russo One', system-ui, sans-serif; font-size: 1rem; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: linear-gradient(135deg, var(--accent-green), #16a34a); color: #fff; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34,197,94,0.3); }
+.btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid #334155; }
+.btn-secondary:hover { background: #243044; }
+.btn-small { padding: 8px 18px; font-size: 0.85rem; background: var(--bg-card); color: var(--text-primary); border: 1px solid #334155; border-radius: var(--radius-sm); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.btn-small:hover { background: #243044; }
+
+#game-screen { flex-direction: column; }
+.game-header { width: 100%; padding: 8px 16px; }
+.score-panel { display: flex; align-items: center; justify-content: center; gap: 24px; max-width: 600px; margin: 0 auto; }
+.team-score { display: flex; align-items: center; gap: 10px; }
+.team-name { font-family: 'Russo One', system-ui, sans-serif; font-size: 0.9rem; }
+.team1-score .team-name { color: var(--accent-red); }
+.team2-score .team-name { color: var(--accent-blue); }
+.score { font-family: 'Russo One', system-ui, sans-serif; font-size: 2rem; min-width: 40px; text-align: center; }
+.team1-score .score { color: var(--accent-red); }
+.team2-score .score { color: var(--accent-blue); }
+.game-info { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.timer { font-family: 'Russo One', system-ui, sans-serif; font-size: 1.4rem; color: var(--accent-gold); }
+.turn-indicator { font-size: 0.75rem; color: var(--text-secondary); padding: 2px 12px; background: var(--bg-card); border-radius: 20px; }
+
+.canvas-wrapper { position: relative; flex: 1; display: flex; justify-content: center; align-items: center; padding: 8px; min-height: 0; }
+#game-canvas { border-radius: var(--radius); box-shadow: 0 0 40px rgba(0,0,0,0.5); display: block; }
+
+.power-bar-container { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.7); padding: 8px 16px; border-radius: 20px; }
+.power-bar { width: 160px; height: 12px; background: #333; border-radius: 6px; overflow: hidden; }
+.power-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-green), var(--accent-gold), var(--accent-red)); border-radius: 6px; transition: width 0.05s; }
+.power-label { font-size: 0.75rem; color: var(--text-secondary); }
+.game-controls { padding: 8px 16px; display: flex; justify-content: center; gap: 12px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 100; }
+.goal-text { text-align: center; animation: goalPop 0.5s ease-out; }
+@keyframes goalPop { 0%{transform:scale(0);opacity:0} 60%{transform:scale(1.2)} 100%{transform:scale(1);opacity:1} }
+.goal-word {
+  display: block; font-family: 'Russo One', system-ui, sans-serif; font-size: 5rem;
+  background: linear-gradient(135deg, var(--accent-gold), #fbbf24);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.goal-team { display: block; font-family: 'Russo One', system-ui, sans-serif; font-size: 1.5rem; color: var(--text-secondary); margin-top: 8px; }
+.pause-content { text-align: center; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+.pause-content h2 { font-size: 2rem; margin-bottom: 8px; }
+
+.gameover-container { text-align: center; max-width: 480px; width: 90%; }
+.gameover-container h2 { font-size: 2.2rem; margin-bottom: 32px; }
+.final-score { display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 40px; }
+.final-team { font-family: 'Russo One', system-ui, sans-serif; font-size: 1.2rem; }
+.final-vs { font-family: 'Russo One', system-ui, sans-serif; font-size: 3rem; color: var(--accent-gold); }
+.gameover-actions { display: flex; gap: 12px; justify-content: center; }
+
+@media (max-width: 600px) {
+  .logo h1 { font-size: 1.6rem; }
+  .logo-icon { font-size: 48px; }
+  .menu-btn { padding: 16px 18px; }
+  .mode-name { font-size: 1.1rem; }
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
+  .score-panel { gap: 12px; }
+  .team-name { font-size: 0.75rem; }
+  .score { font-size: 1.5rem; }
+  .timer { font-size: 1.1rem; }
+  .goal-word { font-size: 3rem; }
+  .final-vs { font-size: 2rem; }
+}
+  </style>
 </head>
 <body>
   <div id="app">
-    <!-- Menu Screen -->
     <div id="menu-screen" class="screen active">
       <div class="menu-container">
         <div class="logo">
@@ -42,12 +188,11 @@
           </button>
         </div>
         <div class="menu-footer">
-          <p>Clique em um botão do seu time para lançar!</p>
+          <p>Arraste para trás de um botão do seu time para lançar!</p>
         </div>
       </div>
     </div>
 
-    <!-- Team Select Screen -->
     <div id="team-select-screen" class="screen">
       <div class="team-select-container">
         <h2>Escolha os Times</h2>
@@ -69,7 +214,6 @@
       </div>
     </div>
 
-    <!-- Game Screen -->
     <div id="game-screen" class="screen">
       <div class="game-header">
         <div class="score-panel">
@@ -90,19 +234,16 @@
       <div class="canvas-wrapper">
         <canvas id="game-canvas"></canvas>
         <div class="power-bar-container" id="power-bar-container" style="display:none;">
-          <div class="power-bar">
-            <div class="power-fill" id="power-fill"></div>
-          </div>
+          <div class="power-bar"><div class="power-fill" id="power-fill"></div></div>
           <span class="power-label">Força</span>
         </div>
       </div>
       <div class="game-controls">
-        <button class="btn btn-small" id="btn-pause">⏸ Pausar</button>
-        <button class="btn btn-small" id="btn-quit">✕ Sair</button>
+        <button class="btn-small" id="btn-pause">⏸ Pausar</button>
+        <button class="btn-small" id="btn-quit">✕ Sair</button>
       </div>
     </div>
 
-    <!-- Goal Overlay -->
     <div id="goal-overlay" class="overlay" style="display:none;">
       <div class="goal-text">
         <span class="goal-word">GOOOL!</span>
@@ -110,7 +251,6 @@
       </div>
     </div>
 
-    <!-- Game Over Screen -->
     <div id="gameover-screen" class="screen">
       <div class="gameover-container">
         <h2 id="gameover-title">Fim de Jogo!</h2>
@@ -128,7 +268,6 @@
       </div>
     </div>
 
-    <!-- Pause Overlay -->
     <div id="pause-overlay" class="overlay" style="display:none;">
       <div class="pause-content">
         <h2>Jogo Pausado</h2>
@@ -138,10 +277,602 @@
     </div>
   </div>
 
-  <script src="js/teams.js"></script>
-  <script src="js/physics.js"></script>
-  <script src="js/game.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/main.js"></script>
+<script>
+// ===== TEAMS =====
+const TEAMS = [
+  { id: 'brasil',     name: 'Brasil',      flag: '🇧🇷', colors: ['#009739','#FEDD00'] },
+  { id: 'argentina',  name: 'Argentina',   flag: '🇦🇷', colors: ['#74ACDF','#FFFFFF'] },
+  { id: 'alemanha',   name: 'Alemanha',    flag: '🇩🇪', colors: ['#FFFFFF','#000000'] },
+  { id: 'franca',     name: 'França',      flag: '🇫🇷', colors: ['#002395','#FFFFFF'] },
+  { id: 'espanha',    name: 'Espanha',     flag: '🇪🇸', colors: ['#C60B1E','#FFC400'] },
+  { id: 'italia',     name: 'Itália',      flag: '🇮🇹', colors: ['#0066CC','#FFFFFF'] },
+  { id: 'portugal',   name: 'Portugal',    flag: '🇵🇹', colors: ['#DA291C','#006847'] },
+  { id: 'inglaterra', name: 'Inglaterra',  flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', colors: ['#FFFFFF','#CF081F'] },
+  { id: 'holanda',    name: 'Holanda',     flag: '🇳🇱', colors: ['#FF6C00','#FFFFFF'] },
+  { id: 'belgica',    name: 'Bélgica',     flag: '🇧🇪', colors: ['#ED2939','#000000'] },
+  { id: 'uruguai',    name: 'Uruguai',     flag: '🇺🇾', colors: ['#5DADE2','#FFFFFF'] },
+  { id: 'colombia',   name: 'Colômbia',    flag: '🇨🇴', colors: ['#FCD116','#003893'] },
+];
+
+const MODE_CONFIG = {
+  '1v1': { players: 3, label: '1 vs 1' },
+  '2v2': { players: 5, label: '2 vs 2' },
+  '3v3': { players: 7, label: '3 vs 3' },
+};
+
+// ===== PHYSICS =====
+class Vec2 {
+  constructor(x = 0, y = 0) { this.x = x; this.y = y; }
+  add(v) { return new Vec2(this.x + v.x, this.y + v.y); }
+  sub(v) { return new Vec2(this.x - v.x, this.y - v.y); }
+  scale(s) { return new Vec2(this.x * s, this.y * s); }
+  len() { return Math.hypot(this.x, this.y); }
+  norm() { const l = this.len(); return l > 0 ? this.scale(1 / l) : new Vec2(); }
+  dot(v) { return this.x * v.x + this.y * v.y; }
+}
+
+class PhysicsBody {
+  constructor(x, y, radius, mass) {
+    this.pos = new Vec2(x, y);
+    this.vel = new Vec2();
+    this.radius = radius;
+    this.mass = mass || 1;
+    this.friction = 0.985;
+  }
+  update(dt) {
+    this.pos = this.pos.add(this.vel.scale(dt));
+    this.vel = this.vel.scale(this.friction);
+    if (this.vel.len() < 0.3) this.vel = new Vec2();
+  }
+  isMoving() { return this.vel.len() > 0.3; }
+}
+
+class PhysicsEngine {
+  constructor(fw, fh, gw, gh) {
+    this.fieldW = fw; this.fieldH = fh; this.goalW = gw; this.goalH = gh;
+    this.bodies = []; this.ball = null;
+  }
+  addBody(b) { this.bodies.push(b); }
+  setBall(b) { this.ball = b; this.addBody(b); }
+
+  update(dt) {
+    for (const b of this.bodies) b.update(dt);
+    this.resolveCollisions();
+    this.constrainToField();
+  }
+
+  resolveCollisions() {
+    for (let i = 0; i < this.bodies.length; i++)
+      for (let j = i + 1; j < this.bodies.length; j++)
+        this.collide(this.bodies[i], this.bodies[j]);
+  }
+
+  collide(a, b) {
+    const diff = b.pos.sub(a.pos);
+    const dist = diff.len();
+    const minDist = a.radius + b.radius;
+    if (dist >= minDist || dist === 0) return;
+    const n = diff.norm();
+    const overlap = minDist - dist;
+    const tm = a.mass + b.mass;
+    a.pos = a.pos.sub(n.scale(overlap * (b.mass / tm)));
+    b.pos = b.pos.add(n.scale(overlap * (a.mass / tm)));
+    const rv = a.vel.sub(b.vel).dot(n);
+    if (rv > 0) return;
+    const imp = -(1 + 0.8) * rv / tm;
+    a.vel = a.vel.add(n.scale(imp * b.mass));
+    b.vel = b.vel.sub(n.scale(imp * a.mass));
+  }
+
+  constrainToField() {
+    const gT = (this.fieldH - this.goalH) / 2;
+    const gB = gT + this.goalH;
+    for (const b of this.bodies) {
+      const isBall = b === this.ball;
+      if (b.pos.x - b.radius < 0) {
+        if (!(isBall && b.pos.y > gT && b.pos.y < gB)) {
+          b.pos.x = b.radius; b.vel.x = Math.abs(b.vel.x) * 0.6;
+        }
+      }
+      if (b.pos.x + b.radius > this.fieldW) {
+        if (!(isBall && b.pos.y > gT && b.pos.y < gB)) {
+          b.pos.x = this.fieldW - b.radius; b.vel.x = -Math.abs(b.vel.x) * 0.6;
+        }
+      }
+      if (b.pos.y - b.radius < 0) { b.pos.y = b.radius; b.vel.y = Math.abs(b.vel.y) * 0.6; }
+      if (b.pos.y + b.radius > this.fieldH) { b.pos.y = this.fieldH - b.radius; b.vel.y = -Math.abs(b.vel.y) * 0.6; }
+      if (!isBall) this.constrainGoalPosts(b, gT, gB);
+    }
+  }
+
+  constrainGoalPosts(b, gT, gB) {
+    const posts = [{x:0,y:gT},{x:0,y:gB},{x:this.fieldW,y:gT},{x:this.fieldW,y:gB}];
+    for (const p of posts) {
+      const d = b.pos.sub(new Vec2(p.x, p.y));
+      const dist = d.len();
+      const minD = b.radius + 4;
+      if (dist < minD && dist > 0) {
+        const n = d.norm();
+        b.pos = new Vec2(p.x, p.y).add(n.scale(minD));
+        const vn = b.vel.dot(n);
+        if (vn < 0) b.vel = b.vel.sub(n.scale(vn * 1.5));
+      }
+    }
+  }
+
+  checkGoal() {
+    if (!this.ball) return 0;
+    const gT = (this.fieldH - this.goalH) / 2;
+    const gB = gT + this.goalH;
+    const b = this.ball;
+    if (b.pos.x < -b.radius && b.pos.y > gT && b.pos.y < gB) return 2;
+    if (b.pos.x > this.fieldW + b.radius && b.pos.y > gT && b.pos.y < gB) return 1;
+    return 0;
+  }
+
+  allStopped() { return this.bodies.every(b => !b.isMoving()); }
+}
+
+// ===== GAME =====
+class Game {
+  constructor(canvas, mode, t1, t2) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.mode = mode;
+    this.team1Data = t1;
+    this.team2Data = t2;
+    this.numPlayers = MODE_CONFIG[mode].players;
+    this.BUTTON_RADIUS = 18;
+    this.BALL_RADIUS = 10;
+    this.GOAL_DEPTH = 30;
+    this.SHOOT_FORCE = 18;
+    this.score = [0, 0];
+    this.currentTeam = 1;
+    this.state = 'waiting';
+    this.prevState = null;
+    this.selectedButton = null;
+    this.aimStart = null;
+    this.aimEnd = null;
+    this.power = 0;
+    this.timeLeft = 300;
+    this.lastTick = 0;
+    this.animFrame = null;
+    this.team1Buttons = [];
+    this.team2Buttons = [];
+    this.onGoal = null;
+    this.onTimeUpdate = null;
+    this.onTurnChange = null;
+    this.onGameOver = null;
+    this.resize();
+    this.initPhysics();
+    this.setupPositions();
+    this.bindEvents();
+  }
+
+  resize() {
+    const wr = this.canvas.parentElement;
+    const mW = wr.clientWidth - 16;
+    const mH = wr.clientHeight - 16;
+    const asp = 3 / 2;
+    let w, h;
+    if (mW / mH > asp) { h = mH; w = h * asp; } else { w = mW; h = w / asp; }
+    this.fieldW = Math.floor(w);
+    this.fieldH = Math.floor(h);
+    this.canvas.width = this.fieldW;
+    this.canvas.height = this.fieldH;
+    this.goalH = this.fieldH * 0.3;
+    this.goalDepth = this.GOAL_DEPTH;
+  }
+
+  initPhysics() {
+    this.physics = new PhysicsEngine(this.fieldW, this.fieldH, this.goalDepth, this.goalH);
+    this.ball = new PhysicsBody(this.fieldW / 2, this.fieldH / 2, this.BALL_RADIUS, 0.5);
+    this.ball.friction = 0.99;
+    this.physics.setBall(this.ball);
+  }
+
+  setupPositions() {
+    this.team1Buttons = [];
+    this.team2Buttons = [];
+    for (const p of this.getFormation(1)) {
+      const b = new PhysicsBody(p.x, p.y, this.BUTTON_RADIUS, 2);
+      b.team = 1; this.team1Buttons.push(b); this.physics.addBody(b);
+    }
+    for (const p of this.getFormation(2)) {
+      const b = new PhysicsBody(p.x, p.y, this.BUTTON_RADIUS, 2);
+      b.team = 2; this.team2Buttons.push(b); this.physics.addBody(b);
+    }
+  }
+
+  getFormation(team) {
+    const n = this.numPlayers, w = this.fieldW, h = this.fieldH, pos = [];
+    if (team === 1) {
+      pos.push({x:w*0.08,y:h*0.5});
+      if (n>=3) { pos.push({x:w*0.2,y:h*0.35}); pos.push({x:w*0.2,y:h*0.65}); }
+      if (n>=5) { pos.push({x:w*0.35,y:h*0.3}); pos.push({x:w*0.35,y:h*0.7}); }
+      if (n>=7) { pos.push({x:w*0.45,y:h*0.4}); pos.push({x:w*0.45,y:h*0.6}); }
+    } else {
+      pos.push({x:w*0.92,y:h*0.5});
+      if (n>=3) { pos.push({x:w*0.8,y:h*0.35}); pos.push({x:w*0.8,y:h*0.65}); }
+      if (n>=5) { pos.push({x:w*0.65,y:h*0.3}); pos.push({x:w*0.65,y:h*0.7}); }
+      if (n>=7) { pos.push({x:w*0.55,y:h*0.4}); pos.push({x:w*0.55,y:h*0.6}); }
+    }
+    return pos;
+  }
+
+  resetPositions() {
+    const p1 = this.getFormation(1), p2 = this.getFormation(2);
+    this.team1Buttons.forEach((b,i) => { b.pos = new Vec2(p1[i].x, p1[i].y); b.vel = new Vec2(); });
+    this.team2Buttons.forEach((b,i) => { b.pos = new Vec2(p2[i].x, p2[i].y); b.vel = new Vec2(); });
+    this.ball.pos = new Vec2(this.fieldW/2, this.fieldH/2);
+    this.ball.vel = new Vec2();
+  }
+
+  bindEvents() {
+    this._md = this.onMD.bind(this);
+    this._mm = this.onMM.bind(this);
+    this._mu = this.onMU.bind(this);
+    this._ts = (e) => { e.preventDefault(); const t=e.touches[0]; this.onMD({clientX:t.clientX,clientY:t.clientY}); };
+    this._tm = (e) => { e.preventDefault(); const t=e.touches[0]; this.onMM({clientX:t.clientX,clientY:t.clientY}); };
+    this._te = () => { this.onMU(); };
+    this.canvas.addEventListener('mousedown', this._md);
+    this.canvas.addEventListener('mousemove', this._mm);
+    this.canvas.addEventListener('mouseup', this._mu);
+    this.canvas.addEventListener('touchstart', this._ts, {passive:false});
+    this.canvas.addEventListener('touchmove', this._tm, {passive:false});
+    this.canvas.addEventListener('touchend', this._te);
+  }
+
+  unbindEvents() {
+    this.canvas.removeEventListener('mousedown', this._md);
+    this.canvas.removeEventListener('mousemove', this._mm);
+    this.canvas.removeEventListener('mouseup', this._mu);
+    this.canvas.removeEventListener('touchstart', this._ts);
+    this.canvas.removeEventListener('touchmove', this._tm);
+    this.canvas.removeEventListener('touchend', this._te);
+  }
+
+  cPos(e) {
+    const r = this.canvas.getBoundingClientRect();
+    return new Vec2((e.clientX-r.left)*(this.canvas.width/r.width),(e.clientY-r.top)*(this.canvas.height/r.height));
+  }
+
+  onMD(e) {
+    if (this.state !== 'waiting') return;
+    const pos = this.cPos(e);
+    const btns = this.currentTeam === 1 ? this.team1Buttons : this.team2Buttons;
+    for (const b of btns) {
+      if (pos.sub(b.pos).len() < b.radius + 10) {
+        this.selectedButton = b; this.aimStart = pos; this.aimEnd = pos; this.state = 'aiming'; return;
+      }
+    }
+  }
+
+  onMM(e) {
+    if (this.state !== 'aiming' || !this.selectedButton) return;
+    this.aimEnd = this.cPos(e);
+    this.power = Math.min(this.aimStart.sub(this.aimEnd).len() / 150, 1);
+  }
+
+  onMU() {
+    if (this.state !== 'aiming' || !this.selectedButton) return;
+    const diff = this.aimStart.sub(this.aimEnd);
+    const force = Math.min(diff.len() / 150, 1) * this.SHOOT_FORCE;
+    if (force > 0.5) {
+      this.selectedButton.vel = diff.norm().scale(force * 60);
+      this.state = 'animating';
+    } else {
+      this.state = 'waiting';
+    }
+    this.power = 0;
+    this.selectedButton = null;
+    this.aimStart = null;
+    this.aimEnd = null;
+  }
+
+  start() { this.lastTick = performance.now(); this.state = 'waiting'; this.loop(); }
+
+  loop() {
+    const now = performance.now();
+    const dt = Math.min((now - this.lastTick) / 1000, 0.05);
+    this.lastTick = now;
+
+    if (this.state !== 'paused' && this.state !== 'ended' && this.state !== 'goal') {
+      this.timeLeft -= dt;
+      if (this.timeLeft <= 0) { this.timeLeft = 0; this.endGame(); return; }
+      if (this.onTimeUpdate) this.onTimeUpdate(this.timeLeft);
+    }
+
+    if (this.state === 'animating') {
+      this.physics.update(dt * 60);
+      const gs = this.physics.checkGoal();
+      if (gs > 0) {
+        this.score[gs-1]++;
+        this.state = 'goal';
+        if (this.onGoal) this.onGoal(gs, this.score);
+        setTimeout(() => {
+          this.resetPositions();
+          this.currentTeam = gs === 1 ? 2 : 1;
+          this.state = 'waiting';
+          if (this.onTurnChange) this.onTurnChange(this.currentTeam);
+        }, 2000);
+      } else if (this.physics.allStopped()) {
+        this.currentTeam = this.currentTeam === 1 ? 2 : 1;
+        this.state = 'waiting';
+        if (this.onTurnChange) this.onTurnChange(this.currentTeam);
+      }
+    }
+
+    this.draw();
+    this.animFrame = requestAnimationFrame(() => this.loop());
+  }
+
+  pause() { if (this.state==='paused'||this.state==='ended') return; this.prevState=this.state; this.state='paused'; }
+  resume() { if (this.state!=='paused') return; this.state=this.prevState||'waiting'; this.prevState=null; this.lastTick=performance.now(); }
+  endGame() { this.state='ended'; if(this.animFrame) cancelAnimationFrame(this.animFrame); if(this.onGameOver) this.onGameOver(this.score); }
+  destroy() { this.state='ended'; if(this.animFrame) cancelAnimationFrame(this.animFrame); this.unbindEvents(); }
+
+  draw() {
+    const c = this.ctx, w = this.fieldW, h = this.fieldH;
+    c.fillStyle = '#1b7a2d'; c.fillRect(0,0,w,h);
+
+    const sw = w/12;
+    for (let i=0;i<12;i++) { if(i%2===0){c.fillStyle='rgba(0,0,0,0.04)';c.fillRect(i*sw,0,sw,h);} }
+
+    const gT = (h-this.goalH)/2;
+    c.fillStyle = 'rgba(255,255,255,0.1)';
+    c.fillRect(-this.goalDepth, gT, this.goalDepth, this.goalH);
+    c.fillRect(w, gT, this.goalDepth, this.goalH);
+
+    c.strokeStyle='rgba(255,255,255,0.15)'; c.lineWidth=1;
+    for(let y=gT;y<gT+this.goalH;y+=10){
+      c.beginPath();c.moveTo(-this.goalDepth,y);c.lineTo(0,y);c.stroke();
+      c.beginPath();c.moveTo(w,y);c.lineTo(w+this.goalDepth,y);c.stroke();
+    }
+
+    c.strokeStyle='rgba(255,255,255,0.6)'; c.lineWidth=2;
+    c.strokeRect(1,1,w-2,h-2);
+    c.beginPath();c.moveTo(w/2,0);c.lineTo(w/2,h);c.stroke();
+    c.beginPath();c.arc(w/2,h/2,h*0.15,0,Math.PI*2);c.stroke();
+    c.fillStyle='rgba(255,255,255,0.6)';c.beginPath();c.arc(w/2,h/2,4,0,Math.PI*2);c.fill();
+
+    const pW=w*0.15,pH=h*0.5,pT=(h-pH)/2;
+    c.strokeRect(0,pT,pW,pH); c.strokeRect(w-pW,pT,pW,pH);
+    const sW=w*0.06,sH=h*0.25,sT=(h-sH)/2;
+    c.strokeRect(0,sT,sW,sH); c.strokeRect(w-sW,sT,sW,sH);
+
+    c.fillStyle='#fff';
+    c.fillRect(-2,gT-4,6,8); c.fillRect(-2,gT+this.goalH-4,6,8);
+    c.fillRect(w-4,gT-4,6,8); c.fillRect(w-4,gT+this.goalH-4,6,8);
+
+    this.drawButtons(c, this.team1Buttons, this.team1Data, 1);
+    this.drawButtons(c, this.team2Buttons, this.team2Data, 2);
+    this.drawBall(c);
+
+    if (this.state==='aiming' && this.selectedButton && this.aimStart && this.aimEnd) this.drawArrow(c);
+
+    if (this.state==='waiting') {
+      const btns = this.currentTeam===1 ? this.team1Buttons : this.team2Buttons;
+      const col = this.currentTeam===1 ? 'rgba(239,68,68,0.5)' : 'rgba(59,130,246,0.5)';
+      for (const b of btns) {
+        c.beginPath();c.arc(b.pos.x,b.pos.y,b.radius+5,0,Math.PI*2);
+        c.strokeStyle=col;c.lineWidth=2;c.setLineDash([4,4]);c.stroke();c.setLineDash([]);
+      }
+    }
+  }
+
+  drawButtons(c, btns, td, tn) {
+    for (const b of btns) {
+      const x=b.pos.x,y=b.pos.y,r=b.radius;
+      c.beginPath();c.arc(x+2,y+3,r,0,Math.PI*2);c.fillStyle='rgba(0,0,0,0.3)';c.fill();
+      c.beginPath();c.arc(x,y,r,0,Math.PI*2);
+      const g=c.createRadialGradient(x-3,y-3,0,x,y,r);
+      g.addColorStop(0,td.colors[0]);g.addColorStop(1,this.dk(td.colors[0],30));
+      c.fillStyle=g;c.fill();
+      c.beginPath();c.arc(x,y,r*0.6,0,Math.PI*2);c.fillStyle=td.colors[1];c.fill();
+      c.beginPath();c.arc(x,y,r,0,Math.PI*2);
+      c.strokeStyle=tn===1?'rgba(239,68,68,0.8)':'rgba(59,130,246,0.8)';c.lineWidth=2;c.stroke();
+      c.beginPath();c.arc(x-r*0.2,y-r*0.2,r*0.35,0,Math.PI*2);c.fillStyle='rgba(255,255,255,0.2)';c.fill();
+    }
+  }
+
+  drawBall(c) {
+    const x=this.ball.pos.x,y=this.ball.pos.y,r=this.ball.radius;
+    c.beginPath();c.arc(x+1,y+2,r,0,Math.PI*2);c.fillStyle='rgba(0,0,0,0.25)';c.fill();
+    c.beginPath();c.arc(x,y,r,0,Math.PI*2);
+    const g=c.createRadialGradient(x-2,y-2,0,x,y,r);g.addColorStop(0,'#fff');g.addColorStop(1,'#ccc');
+    c.fillStyle=g;c.fill();
+    c.strokeStyle='#333';c.lineWidth=0.8;
+    for(const a of [0,72,144,216,288]){
+      const rad=a*Math.PI/180;
+      c.beginPath();c.arc(x+Math.cos(rad)*r*0.55,y+Math.sin(rad)*r*0.55,r*0.2,0,Math.PI*2);c.stroke();
+    }
+    c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.strokeStyle='#999';c.lineWidth=1;c.stroke();
+  }
+
+  drawArrow(c) {
+    const b=this.selectedButton, diff=this.aimStart.sub(this.aimEnd), dir=diff.norm();
+    const f=Math.min(diff.len()/150,1), al=f*100;
+    const s=b.pos, e=s.add(dir.scale(al));
+    c.beginPath();c.moveTo(s.x,s.y);c.lineTo(e.x,e.y);
+    c.strokeStyle=`rgba(255,255,100,${0.5+f*0.5})`;c.lineWidth=3;c.stroke();
+    const hl=12,an=Math.atan2(dir.y,dir.x);
+    c.beginPath();c.moveTo(e.x,e.y);
+    c.lineTo(e.x-hl*Math.cos(an-0.4),e.y-hl*Math.sin(an-0.4));
+    c.lineTo(e.x-hl*Math.cos(an+0.4),e.y-hl*Math.sin(an+0.4));
+    c.closePath();c.fillStyle=`rgba(255,255,100,${0.5+f*0.5})`;c.fill();
+    c.setLineDash([4,6]);c.beginPath();c.moveTo(e.x,e.y);
+    c.lineTo(s.x+dir.x*al*2,s.y+dir.y*al*2);c.strokeStyle='rgba(255,255,255,0.2)';c.lineWidth=1;c.stroke();c.setLineDash([]);
+    c.beginPath();c.arc(b.pos.x,b.pos.y,b.radius+6,0,Math.PI*2);c.strokeStyle='rgba(255,255,100,0.8)';c.lineWidth=3;c.stroke();
+  }
+
+  dk(hex, amt) {
+    let co=hex.replace('#','');
+    if(co.length===3) co=co[0]+co[0]+co[1]+co[1]+co[2]+co[2];
+    return `rgb(${Math.max(0,parseInt(co.substr(0,2),16)-amt)},${Math.max(0,parseInt(co.substr(2,2),16)-amt)},${Math.max(0,parseInt(co.substr(4,2),16)-amt)})`;
+  }
+}
+
+// ===== UI =====
+class UI {
+  constructor() {
+    this.screens = {
+      menu: document.getElementById('menu-screen'),
+      teamSelect: document.getElementById('team-select-screen'),
+      game: document.getElementById('game-screen'),
+      gameover: document.getElementById('gameover-screen'),
+    };
+    this.el = {
+      score1: document.getElementById('score1'),
+      score2: document.getElementById('score2'),
+      timer: document.getElementById('timer'),
+      turnIndicator: document.getElementById('turn-indicator'),
+      team1Name: document.getElementById('team1-name'),
+      team2Name: document.getElementById('team2-name'),
+      goalOverlay: document.getElementById('goal-overlay'),
+      goalTeam: document.getElementById('goal-team'),
+      pauseOverlay: document.getElementById('pause-overlay'),
+      powerBarContainer: document.getElementById('power-bar-container'),
+      powerFill: document.getElementById('power-fill'),
+      gameoverTitle: document.getElementById('gameover-title'),
+      finalTeam1: document.getElementById('final-team1'),
+      finalTeam2: document.getElementById('final-team2'),
+      finalScore1: document.getElementById('final-score1'),
+      finalScore2: document.getElementById('final-score2'),
+      team1Grid: document.getElementById('team1-grid'),
+      team2Grid: document.getElementById('team2-grid'),
+    };
+  }
+
+  showScreen(name) {
+    Object.values(this.screens).forEach(s => s.classList.remove('active'));
+    if (this.screens[name]) this.screens[name].classList.add('active');
+  }
+
+  populateTeamGrids() {
+    this.el.team1Grid.innerHTML = '';
+    this.el.team2Grid.innerHTML = '';
+    for (const t of TEAMS) {
+      this.el.team1Grid.appendChild(this.mkOpt(t));
+      this.el.team2Grid.appendChild(this.mkOpt(t));
+    }
+    this.selectTeam(1,'brasil');
+    this.selectTeam(2,'argentina');
+  }
+
+  mkOpt(t) {
+    const b = document.createElement('button');
+    b.className='team-option'; b.dataset.teamId=t.id;
+    b.innerHTML=`<span class="team-flag">${t.flag}</span>${t.name}`;
+    return b;
+  }
+
+  selectTeam(n, id) {
+    const g = this.el[n===1?'team1Grid':'team2Grid'];
+    g.querySelectorAll('.team-option').forEach(b => b.classList.toggle('selected', b.dataset.teamId===id));
+  }
+
+  getSelectedTeam(n) {
+    const g = this.el[n===1?'team1Grid':'team2Grid'];
+    const s = g.querySelector('.team-option.selected');
+    if(!s) return TEAMS[0];
+    return TEAMS.find(t=>t.id===s.dataset.teamId)||TEAMS[0];
+  }
+
+  updateScore(s) { this.el.score1.textContent=s[0]; this.el.score2.textContent=s[1]; }
+
+  updateTimer(sec) {
+    const m=Math.floor(sec/60), s=Math.floor(sec%60);
+    this.el.timer.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  updateTurn(tn, td) {
+    this.el.turnIndicator.textContent=`Vez: ${td.name}`;
+    this.el.turnIndicator.style.borderLeft=`3px solid ${tn===1?'#ef4444':'#3b82f6'}`;
+  }
+
+  setTeamNames(t1,t2) { this.el.team1Name.textContent=t1.name; this.el.team2Name.textContent=t2.name; }
+
+  showGoal(tn, td) {
+    this.el.goalTeam.textContent=td.name;
+    this.el.goalOverlay.style.display='flex';
+    setTimeout(()=>{ this.el.goalOverlay.style.display='none'; }, 1800);
+  }
+
+  showPause() { this.el.pauseOverlay.style.display='flex'; }
+  hidePause() { this.el.pauseOverlay.style.display='none'; }
+
+  updatePower(p) {
+    if(p>0){ this.el.powerBarContainer.style.display='flex'; this.el.powerFill.style.width=`${p*100}%`; }
+    else { this.el.powerBarContainer.style.display='none'; }
+  }
+
+  showGameOver(sc, t1, t2) {
+    let title;
+    if(sc[0]>sc[1]) title=`${t1.name} Venceu!`;
+    else if(sc[1]>sc[0]) title=`${t2.name} Venceu!`;
+    else title='Empate!';
+    this.el.gameoverTitle.textContent=title;
+    this.el.finalTeam1.textContent=t1.flag+' '+t1.name;
+    this.el.finalTeam2.textContent=t2.flag+' '+t2.name;
+    this.el.finalScore1.textContent=sc[0];
+    this.el.finalScore2.textContent=sc[1];
+    this.showScreen('gameover');
+  }
+}
+
+// ===== MAIN =====
+(() => {
+  const ui = new UI();
+  let game = null, selectedMode = '1v1';
+
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.addEventListener('click', () => { selectedMode=btn.dataset.mode; ui.populateTeamGrids(); ui.showScreen('teamSelect'); });
+  });
+
+  document.getElementById('team1-grid').addEventListener('click', e => {
+    const o=e.target.closest('.team-option'); if(o) ui.selectTeam(1, o.dataset.teamId);
+  });
+  document.getElementById('team2-grid').addEventListener('click', e => {
+    const o=e.target.closest('.team-option'); if(o) ui.selectTeam(2, o.dataset.teamId);
+  });
+
+  document.getElementById('btn-back-menu').addEventListener('click', () => ui.showScreen('menu'));
+  document.getElementById('btn-start-game').addEventListener('click', startGame);
+  document.getElementById('btn-pause').addEventListener('click', () => { if(game){game.pause();ui.showPause();} });
+  document.getElementById('btn-resume').addEventListener('click', () => { if(game){game.resume();ui.hidePause();} });
+  document.getElementById('btn-quit').addEventListener('click', quitGame);
+  document.getElementById('btn-quit-pause').addEventListener('click', () => { ui.hidePause(); quitGame(); });
+  document.getElementById('btn-rematch').addEventListener('click', startGame);
+  document.getElementById('btn-main-menu').addEventListener('click', () => ui.showScreen('menu'));
+
+  function startGame() {
+    const t1=ui.getSelectedTeam(1), t2=ui.getSelectedTeam(2);
+    const canvas=document.getElementById('game-canvas');
+    ui.showScreen('game');
+    ui.setTeamNames(t1,t2);
+    ui.updateScore([0,0]);
+    ui.updateTimer(300);
+    ui.updateTurn(1,t1);
+    if(game) game.destroy();
+    game = new Game(canvas, selectedMode, t1, t2);
+    game.onGoal = (tn,sc) => { ui.updateScore(sc); ui.showGoal(tn, tn===1?t1:t2); };
+    game.onTimeUpdate = tl => ui.updateTimer(tl);
+    game.onTurnChange = tn => ui.updateTurn(tn, tn===1?t1:t2);
+    game.onGameOver = sc => ui.showGameOver(sc,t1,t2);
+    const origDraw = game.draw.bind(game);
+    game.draw = function(){ origDraw(); ui.updatePower(this.state==='aiming'?this.power:0); };
+    game.start();
+  }
+
+  function quitGame() { if(game){game.destroy();game=null;} ui.showScreen('menu'); }
+
+  let rt;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { if(game&&game.state!=='ended'){game.resize();game.initPhysics();game.setupPositions();} }, 200);
+  });
+})();
+</script>
 </body>
 </html>
