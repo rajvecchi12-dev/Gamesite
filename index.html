@@ -347,7 +347,7 @@ class Game {
   constructor(canvas,mode){
     this.cv=canvas;this.c=canvas.getContext('2d');this.mode=mode;
     this.np=MODES[mode].players;
-    this.BR=24;this.BLR=12;this.GD=40;this.SF=3;
+    this.BR=24;this.BLR=12;this.GD=40;this.SF=5;
     this.score=[0,0];this.team=1;this.state='waiting';this.prev=null;
     this.sel=null;this.as=null;this.ae=null;this.power=0;
     this.timeLeft=180;this.lt=0;this.af=null;
@@ -362,9 +362,11 @@ class Game {
 
   resize(){
     const wr=this.cv.parentElement,mW=wr.clientWidth,mH=wr.clientHeight;
-    this.fw=Math.floor(mW);this.fh=Math.floor(mH);
+    const asp=2;let w,h;
+    if(mW/mH>=asp){w=mW;h=mH}else{w=mW;h=Math.floor(w/asp)}
+    this.fw=Math.floor(w);this.fh=Math.floor(h);
     this.cv.width=this.fw;this.cv.height=this.fh;
-    this.goalH=this.fh*0.32;
+    this.goalH=this.fh*0.35;
   }
 
   initPhys(){
@@ -428,9 +430,9 @@ class Game {
     if(this.state!=='aiming'||!this.sel)return;
     const diff=this.as.sub(this.ae),force=Math.min(diff.len()/180,1)*this.SF;
     if(force>0.3){
-      let mult=8;
-      if(save.ability==='power'&&!this.abilityUsed){mult=16;this.abilityUsed=true}
-      if(save.ability==='speed'&&!this.abilityUsed){mult=12;this.abilityUsed=true}
+      let mult=12;
+      if(save.ability==='power'&&!this.abilityUsed){mult=24;this.abilityUsed=true}
+      if(save.ability==='speed'&&!this.abilityUsed){mult=18;this.abilityUsed=true}
       if(save.ability==='curve'&&!this.abilityUsed){this.curveActive=true;this.abilityUsed=true}
       if(save.ability==='magnet'&&!this.abilityUsed){this.magnetActive=true;this.abilityUsed=true}
       if(save.ability==='ghost'&&!this.abilityUsed){this.ghostActive=true;this.abilityUsed=true}
@@ -451,7 +453,7 @@ class Game {
       const target=this.ball.pos;
       const dir=target.sub(btn.pos).norm();
       const force=0.4+Math.random()*0.6;
-      btn.vel=dir.sc(force*this.SF*8);
+      btn.vel=dir.sc(force*this.SF*12);
       this.state='animating';
     },600+Math.random()*400);
   }
