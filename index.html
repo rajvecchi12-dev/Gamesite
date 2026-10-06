@@ -92,7 +92,7 @@ h1,h2,h3{font-family:'Russo One',system-ui,sans-serif}
 
 /* Game */
 #game-screen{flex-direction:column}
-.game-hud{width:100%;padding:2px 12px;display:flex;align-items:center;justify-content:center;gap:20px;height:40px}
+.game-hud{width:100%;padding:0 12px;display:flex;align-items:center;justify-content:center;gap:20px;height:30px;min-height:30px}
 .t-score{display:flex;align-items:center;gap:8px}
 .t-name{font-family:'Russo One',system-ui,sans-serif;font-size:.8rem}
 .t1 .t-name{color:var(--red)}.t2 .t-name{color:var(--blue)}
@@ -101,12 +101,12 @@ h1,h2,h3{font-family:'Russo One',system-ui,sans-serif}
 .g-center{display:flex;flex-direction:column;align-items:center}
 .g-timer{font-family:'Russo One',system-ui,sans-serif;font-size:1.1rem;color:var(--gold)}
 .g-turn{font-size:.65rem;color:var(--txt2);padding:1px 10px;background:var(--card);border-radius:16px}
-.canvas-area{flex:1;display:flex;justify-content:center;align-items:center;overflow:hidden;padding:2px}
-#game-canvas{display:block;border-radius:6px;box-shadow:0 0 30px rgba(0,0,0,.5)}
+.canvas-area{flex:1;display:flex;justify-content:center;align-items:center;overflow:hidden;padding:0}
+#game-canvas{display:block;border-radius:4px;box-shadow:0 0 30px rgba(0,0,0,.5)}
 .g-bar{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.7);padding:6px 14px;border-radius:16px}
 .g-bar-track{width:140px;height:10px;background:#333;border-radius:5px;overflow:hidden}
 .g-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));border-radius:5px}
-.g-controls{padding:2px 12px;display:flex;justify-content:center;gap:10px;height:32px;align-items:center}
+.g-controls{padding:0 12px;display:flex;justify-content:center;gap:10px;height:24px;min-height:24px;align-items:center}
 .ability-btn{padding:4px 12px;font-size:.75rem;background:var(--purple);color:#fff;border:2px solid var(--purple);border-radius:var(--rs);cursor:pointer;font-family:'Russo One',system-ui,sans-serif;transition:all .15s}
 .ability-btn:hover{box-shadow:0 0 10px rgba(168,85,247,.4)}
 .ability-btn:disabled{background:#334155;border-color:#334155;color:#666;cursor:default}
@@ -286,7 +286,7 @@ class V2 {
 }
 
 class Body {
-  constructor(x,y,r,m){this.pos=new V2(x,y);this.vel=new V2();this.r=r;this.m=m||1;this.fric=0.96;this.frozen=false}
+  constructor(x,y,r,m){this.pos=new V2(x,y);this.vel=new V2();this.r=r;this.m=m||1;this.fric=0.94;this.frozen=false}
   update(dt){if(this.frozen)return;this.pos=this.pos.add(this.vel.sc(dt));this.vel=this.vel.sc(this.fric);if(this.vel.len()<0.08)this.vel=new V2()}
   moving(){return this.vel.len()>0.08}
 }
@@ -347,7 +347,7 @@ class Game {
   constructor(canvas,mode){
     this.cv=canvas;this.c=canvas.getContext('2d');this.mode=mode;
     this.np=MODES[mode].players;
-    this.BR=24;this.BLR=12;this.GD=40;this.SF=8;
+    this.BR=24;this.BLR=12;this.GD=40;this.SF=3;
     this.score=[0,0];this.team=1;this.state='waiting';this.prev=null;
     this.sel=null;this.as=null;this.ae=null;this.power=0;
     this.timeLeft=180;this.lt=0;this.af=null;
@@ -361,10 +361,8 @@ class Game {
   }
 
   resize(){
-    const wr=this.cv.parentElement,mW=wr.clientWidth-2,mH=wr.clientHeight-2;
-    const asp=16/9;let w,h;
-    if(mW/mH>asp){h=mH;w=h*asp}else{w=mW;h=w/asp}
-    this.fw=Math.floor(w);this.fh=Math.floor(h);
+    const wr=this.cv.parentElement,mW=wr.clientWidth,mH=wr.clientHeight;
+    this.fw=Math.floor(mW);this.fh=Math.floor(mH);
     this.cv.width=this.fw;this.cv.height=this.fh;
     this.goalH=this.fh*0.32;
   }
@@ -372,7 +370,7 @@ class Game {
   initPhys(){
     this.ph=new Physics(this.fw,this.fh,this.goalH);
     this.ball=new Body(this.fw/2,this.fh/2,this.BLR,0.3);
-    this.ball.fric=0.97;
+    this.ball.fric=0.95;
     this.ph.setBall(this.ball);
   }
 
@@ -430,9 +428,9 @@ class Game {
     if(this.state!=='aiming'||!this.sel)return;
     const diff=this.as.sub(this.ae),force=Math.min(diff.len()/180,1)*this.SF;
     if(force>0.3){
-      let mult=20;
-      if(save.ability==='power'&&!this.abilityUsed){mult=40;this.abilityUsed=true}
-      if(save.ability==='speed'&&!this.abilityUsed){mult=30;this.abilityUsed=true}
+      let mult=8;
+      if(save.ability==='power'&&!this.abilityUsed){mult=16;this.abilityUsed=true}
+      if(save.ability==='speed'&&!this.abilityUsed){mult=12;this.abilityUsed=true}
       if(save.ability==='curve'&&!this.abilityUsed){this.curveActive=true;this.abilityUsed=true}
       if(save.ability==='magnet'&&!this.abilityUsed){this.magnetActive=true;this.abilityUsed=true}
       if(save.ability==='ghost'&&!this.abilityUsed){this.ghostActive=true;this.abilityUsed=true}
@@ -452,8 +450,8 @@ class Game {
       const btn=btns[Math.floor(Math.random()*btns.length)];
       const target=this.ball.pos;
       const dir=target.sub(btn.pos).norm();
-      const force=(3+Math.random()*5)*20;
-      btn.vel=dir.sc(force/20*this.SF*18);
+      const force=0.4+Math.random()*0.6;
+      btn.vel=dir.sc(force*this.SF*8);
       this.state='animating';
     },600+Math.random()*400);
   }
@@ -474,7 +472,7 @@ class Game {
         const toGoal=goalCenter.sub(this.ball.pos).norm();
         this.ball.vel=this.ball.vel.add(toGoal.sc(0.15));
       }
-      this.ph.update(dt*30);
+      this.ph.update(dt*16);
       const gs=this.ph.checkGoal();
       if(gs>0){
         this.score[gs-1]++;this.state='goal';
