@@ -6,6 +6,7 @@
   <title>Futebol de Botão Online</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
 :root {
   --bg: #0a0e1a;
@@ -128,6 +129,45 @@ h1,h2,h3{font-family:'Russo One',system-ui,sans-serif}
 .go-reward .rl{font-size:.7rem;color:var(--txt2)}
 .go-btns{display:flex;gap:10px;justify-content:center}
 
+/* Online Lobby */
+.lobby-wrap{text-align:center;max-width:440px;width:92%}
+.lobby-wrap h2{font-size:1.4rem;margin-bottom:20px}
+.lobby-modes{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.lobby-opt{display:flex;align-items:center;gap:14px;width:100%;padding:16px 20px;background:var(--card);border:2px solid transparent;border-radius:var(--r);color:var(--txt);cursor:pointer;transition:all .2s;font-family:inherit}
+.lobby-opt:hover{border-color:var(--green)}
+.lobby-opt .lo-icon{font-size:1.6rem;width:40px;text-align:center}
+.lobby-opt .lo-name{font-family:'Russo One',system-ui,sans-serif;font-size:1rem}
+.lobby-opt .lo-desc{font-size:.72rem;color:var(--txt2)}
+.room-code-box{background:var(--card);border-radius:var(--r);padding:24px;margin:16px 0}
+.room-code-label{color:var(--txt2);font-size:.8rem;margin-bottom:8px}
+.room-code{font-family:'Russo One',system-ui,sans-serif;font-size:2.8rem;letter-spacing:8px;color:var(--gold)}
+.room-waiting{color:var(--txt2);font-size:.8rem;margin-top:12px}
+.room-input{width:200px;padding:12px;font-size:1.4rem;font-family:'Russo One',system-ui,sans-serif;text-align:center;letter-spacing:6px;background:var(--bg);color:var(--txt);border:2px solid #334155;border-radius:var(--rs);outline:none;text-transform:uppercase}
+.room-input:focus{border-color:var(--green)}
+.room-input::placeholder{letter-spacing:2px;font-size:.9rem;color:#555}
+.room-error{color:var(--red);font-size:.75rem;margin-top:8px;min-height:18px}
+.lobby-btns{display:flex;gap:10px;justify-content:center;margin-top:16px}
+
+/* Matchmaking spinner */
+.mm-spinner{width:56px;height:56px;border:4px solid var(--card);border-top-color:var(--green);border-radius:50%;margin:0 auto 14px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* VS Screen */
+.vs-wrap{text-align:center;max-width:440px;width:92%;animation:fadeUp .4s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.vs-title{font-family:'Russo One',system-ui,sans-serif;font-size:2.5rem;color:var(--gold);margin:16px 0}
+.vs-players{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+.vs-p{background:var(--card);border-radius:var(--r);padding:16px 24px;text-align:center;min-width:130px}
+.vs-avatar{width:44px;height:44px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:#fff}
+.vs-name{font-family:'Russo One',system-ui,sans-serif;font-size:.95rem;margin-bottom:2px}
+.vs-rank{font-size:.7rem}
+.vs-mode{color:var(--txt2);font-size:.75rem;margin-top:14px}
+
+/* Disconnect overlay */
+.dc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:110;text-align:center;gap:12px}
+.dc-overlay h2{color:var(--red)}
+.dc-overlay p{color:var(--txt2);font-size:.85rem}
+
 @media(max-width:600px){
   .logo h1{font-size:1.5rem}
   .stat-box{padding:8px 14px;min-width:70px}.stat-val{font-size:1rem}
@@ -160,6 +200,7 @@ h1,h2,h3{font-family:'Russo One',system-ui,sans-serif}
         <button class="mode-btn" data-mode="3v3"><span class="m-icon">👥</span><span style="display:flex;flex-direction:column;align-items:flex-start"><span class="m-name">3 vs 3</span><span class="m-desc">7 botões por time</span></span></button>
       </div>
       <div class="menu-nav">
+        <button class="btn btn-g" id="btn-online">🌐 Online</button>
         <button class="btn btn-p" id="btn-shop">🛒 Loja</button>
         <button class="btn btn-s" id="btn-abilities">⚡ Habilidades</button>
       </div>
@@ -183,6 +224,72 @@ h1,h2,h3{font-family:'Russo One',system-ui,sans-serif}
       <div class="ability-list" id="ability-list"></div>
       <div class="abilities-back"><button class="btn btn-s" id="btn-ab-back">Voltar</button></div>
     </div>
+  </div>
+
+  <!-- ONLINE LOBBY -->
+  <div id="lobby-screen" class="screen">
+    <div class="lobby-wrap">
+      <h2>🌐 Modo Online</h2>
+      <div class="lobby-modes">
+        <button class="lobby-opt" id="btn-create"><span class="lo-icon">🏟️</span><span style="display:flex;flex-direction:column;align-items:flex-start"><span class="lo-name">Criar Sala</span><span class="lo-desc">Crie uma sala e convide um amigo</span></span></button>
+        <button class="lobby-opt" id="btn-join"><span class="lo-icon">🎮</span><span style="display:flex;flex-direction:column;align-items:flex-start"><span class="lo-name">Entrar na Sala</span><span class="lo-desc">Entre com o código de um amigo</span></span></button>
+      </div>
+      <div class="lobby-btns"><button class="btn btn-s" id="btn-lobby-back">Voltar</button></div>
+    </div>
+  </div>
+
+  <!-- CREATE ROOM -->
+  <div id="create-screen" class="screen">
+    <div class="lobby-wrap">
+      <h2>🏟️ Sala Criada</h2>
+      <div id="create-mode-select">
+        <p style="color:var(--txt2);font-size:.8rem;margin-bottom:12px">Escolha o modo:</p>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">
+          <button class="btn btn-s online-mode-btn" data-m="1v1">1v1</button>
+          <button class="btn btn-s online-mode-btn" data-m="2v2">2v2</button>
+          <button class="btn btn-s online-mode-btn" data-m="3v3">3v3</button>
+        </div>
+      </div>
+      <div class="room-code-box">
+        <div class="room-code-label">Código da sala:</div>
+        <div class="room-code" id="room-code">----</div>
+        <div class="room-waiting" id="room-status"><div class="mm-spinner"></div>Aguardando oponente...</div>
+      </div>
+      <div class="lobby-btns"><button class="btn btn-s" id="btn-create-cancel">Cancelar</button></div>
+    </div>
+  </div>
+
+  <!-- JOIN ROOM -->
+  <div id="join-screen" class="screen">
+    <div class="lobby-wrap">
+      <h2>🎮 Entrar na Sala</h2>
+      <p style="color:var(--txt2);font-size:.8rem;margin-bottom:16px">Digite o código da sala:</p>
+      <input class="room-input" id="join-input" type="text" maxlength="4" placeholder="CODE" autocomplete="off">
+      <div class="room-error" id="join-error"></div>
+      <div class="lobby-btns">
+        <button class="btn btn-g" id="btn-join-go">Entrar</button>
+        <button class="btn btn-s" id="btn-join-cancel">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VS SCREEN -->
+  <div id="vs-screen" class="screen">
+    <div class="vs-wrap">
+      <div class="vs-players">
+        <div class="vs-p"><div class="vs-avatar" id="vs-av1" style="background:var(--red)">V</div><div class="vs-name" id="vs-n1">Você</div><div class="vs-rank" id="vs-r1"></div></div>
+        <div class="vs-title">VS</div>
+        <div class="vs-p"><div class="vs-avatar" id="vs-av2" style="background:var(--blue)">?</div><div class="vs-name" id="vs-n2">Oponente</div><div class="vs-rank" id="vs-r2"></div></div>
+      </div>
+      <div class="vs-mode" id="vs-mode">1v1</div>
+    </div>
+  </div>
+
+  <!-- DISCONNECT -->
+  <div id="dc-overlay" class="dc-overlay" style="display:none">
+    <h2>Conexão Perdida</h2>
+    <p>O oponente desconectou.</p>
+    <button class="btn btn-s" id="btn-dc-ok">Voltar ao Menu</button>
   </div>
 
   <!-- GAME -->
@@ -398,7 +505,8 @@ class Physics {
 
 // ===== GAME =====
 class Game {
-  constructor(canvas,mode){
+  constructor(canvas,mode,opts){
+    opts=opts||{};
     this.cv=canvas;this.c=canvas.getContext('2d');this.mode=mode;
     this.np=MODES[mode].players;
     this.BR=24;this.BLR=12;this.GD=40;this.SF=5;
@@ -408,9 +516,12 @@ class Game {
     this.t1=[];this.t2=[];
     this.abilityUsed=false;this.curveActive=false;this.magnetActive=false;this.ghostActive=false;
     this.enemyFrozen=false;
-    this.onGoal=null;this.onTime=null;this.onTurn=null;this.onEnd=null;
+    this.onGoal=null;this.onTime=null;this.onTurn=null;this.onEnd=null;this.onShot=null;
     this.playerSkin=getSkin(save.skin);
-    this.botSkin={c1:'#3b82f6',c2:'#dbeafe'};
+    this.botSkin=opts.oppSkin||{c1:'#3b82f6',c2:'#dbeafe'};
+    this.online=!!opts.online;
+    this.myTeam=opts.myTeam||1;
+    this.isHost=opts.isHost!==false;
     this.resize();this.initPhys();this.setupPos();this.bind();
   }
 
@@ -473,9 +584,10 @@ class Game {
   cp(e){const r=this.cv.getBoundingClientRect();return new V2((e.clientX-r.left)*(this.cv.width/r.width),(e.clientY-r.top)*(this.cv.height/r.height))}
 
   onMD(e){
-    if(this.state!=='waiting'||this.team!==1)return;
+    if(this.state!=='waiting'||this.team!==this.myTeam)return;
     const pos=this.cp(e);
-    for(const b of this.t1){if(pos.sub(b.pos).len()<b.r+12){this.sel=b;this.as=pos;this.ae=pos;this.state='aiming';return}}
+    const myBtns=this.myTeam===1?this.t1:this.t2;
+    for(const b of myBtns){if(pos.sub(b.pos).len()<b.r+12){this.sel=b;this.as=pos;this.ae=pos;this.state='aiming';return}}
   }
   onMM(e){if(this.state!=='aiming'||!this.sel)return;this.ae=this.cp(e);this.power=Math.min(this.as.sub(this.ae).len()/180,1)}
   onMU(){
@@ -488,14 +600,32 @@ class Game {
       if(save.ability==='curve'&&!this.abilityUsed){this.curveActive=true;this.abilityUsed=true}
       if(save.ability==='magnet'&&!this.abilityUsed){this.magnetActive=true;this.abilityUsed=true}
       if(save.ability==='ghost'&&!this.abilityUsed){this.ghostActive=true;this.abilityUsed=true}
-      if(save.ability==='freeze'&&!this.abilityUsed){this.enemyFrozen=true;this.t2.forEach(b=>b.frozen=true);this.abilityUsed=true}
-      this.sel.vel=diff.norm().sc(force*mult);
+      if(save.ability==='freeze'&&!this.abilityUsed){this.enemyFrozen=true;
+        const enemyBtns=this.myTeam===1?this.t2:this.t1;
+        enemyBtns.forEach(b=>b.frozen=true);this.abilityUsed=true}
+      const myBtns=this.myTeam===1?this.t1:this.t2;
+      const idx=myBtns.indexOf(this.sel);
+      const vel=diff.norm().sc(force*mult);
+      this.sel.vel=vel;
       this.state='animating';
+      if(this.online&&this.onShot)this.onShot({i:idx,vx:vel.x,vy:vel.y});
     } else {this.state='waiting'}
     this.power=0;this.sel=null;this.as=null;this.ae=null;
   }
 
+  applyRemoteShot(data){
+    if(this.state!=='waiting')return;
+    const oppTeam=this.myTeam===1?2:1;
+    if(this.team!==oppTeam)return;
+    const btns=oppTeam===1?this.t1:this.t2;
+    if(data.i>=0&&data.i<btns.length){
+      btns[data.i].vel=new V2(data.vx,data.vy);
+      this.state='animating';
+    }
+  }
+
   botTurn(){
+    if(this.online)return;
     if(this.state!=='waiting'||this.team!==2)return;
     setTimeout(()=>{
       if(this.state!=='waiting'||this.team!==2)return;
@@ -580,9 +710,10 @@ class Game {
     this.ph.fx.draw(c);
 
     if(this.state==='aiming'&&this.sel&&this.as&&this.ae)this.drawArrow(c);
-    if(this.state==='waiting'&&this.team===1){
-      const col='rgba(239,68,68,0.4)';
-      for(const b of this.t1){c.beginPath();c.arc(b.pos.x,b.pos.y,b.r+6,0,Math.PI*2);c.strokeStyle=col;c.lineWidth=2;c.setLineDash([5,5]);c.stroke();c.setLineDash([])}
+    if(this.state==='waiting'&&this.team===this.myTeam){
+      const col=this.myTeam===1?'rgba(239,68,68,0.4)':'rgba(59,130,246,0.4)';
+      const myBtns=this.myTeam===1?this.t1:this.t2;
+      for(const b of myBtns){c.beginPath();c.arc(b.pos.x,b.pos.y,b.r+6,0,Math.PI*2);c.strokeStyle=col;c.lineWidth=2;c.setLineDash([5,5]);c.stroke();c.setLineDash([])}
     }
     if(sk>0.5)c.restore();
   }
@@ -653,7 +784,7 @@ class Game {
   $('btn-abilities').addEventListener('click',()=>{renderAbilities();show('abilities-screen')});
   $('btn-shop-back').addEventListener('click',()=>{refreshMenu();show('menu-screen')});
   $('btn-ab-back').addEventListener('click',()=>{refreshMenu();show('menu-screen')});
-  $('btn-quit-game').addEventListener('click',()=>{if(game){game.destroy();game=null}refreshMenu();show('menu-screen')});
+  $('btn-quit-game').addEventListener('click',()=>{if(game){game.destroy();game=null}cleanupPeer();refreshMenu();show('menu-screen')});
   $('btn-again').addEventListener('click',startGame);
   $('btn-go-menu').addEventListener('click',()=>{refreshMenu();show('menu-screen')});
 
@@ -750,6 +881,192 @@ class Game {
       }
       list.appendChild(card);
     }
+  }
+
+  // ===== ONLINE MULTIPLAYER (PeerJS) =====
+  let peer=null,conn=null,onlineMode='1v1',isHost=false,oppInfo=null;
+
+  function genCode(){
+    const ch='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c='';
+    for(let i=0;i<4;i++)c+=ch[Math.floor(Math.random()*ch.length)];
+    return c;
+  }
+
+  function cleanupPeer(){
+    if(conn){try{conn.close()}catch(e){}conn=null}
+    if(peer){try{peer.destroy()}catch(e){}peer=null}
+    oppInfo=null;
+  }
+
+  $('btn-online').addEventListener('click',()=>show('lobby-screen'));
+  $('btn-lobby-back').addEventListener('click',()=>{cleanupPeer();show('menu-screen')});
+
+  // Create room
+  $('btn-create').addEventListener('click',()=>{
+    show('create-screen');onlineMode='1v1';updateModeBtns();createRoom();
+  });
+
+  document.querySelectorAll('.online-mode-btn').forEach(b=>b.addEventListener('click',()=>{
+    onlineMode=b.dataset.m;updateModeBtns();
+    if(conn&&conn.open)conn.send({type:'mode',mode:onlineMode});
+  }));
+
+  function updateModeBtns(){
+    document.querySelectorAll('.online-mode-btn').forEach(b=>{
+      b.style.borderColor=b.dataset.m===onlineMode?'var(--green)':'transparent';
+      b.style.background=b.dataset.m===onlineMode?'rgba(34,197,94,0.15)':'var(--card)';
+    });
+  }
+
+  function createRoom(){
+    cleanupPeer();isHost=true;
+    const code=genCode();
+    $('room-code').textContent=code;
+    $('room-status').innerHTML='<div class="mm-spinner"></div>Aguardando oponente...';
+
+    peer=new Peer('fb-'+code,{debug:0});
+    peer.on('open',()=>console.log('Host ready:',peer.id));
+    peer.on('connection',c=>{conn=c;wireConn(c)});
+    peer.on('error',err=>{
+      console.error('Peer err:',err);
+      if(err.type==='unavailable-id')createRoom();
+    });
+  }
+
+  // Join room
+  $('btn-join').addEventListener('click',()=>{
+    show('join-screen');$('join-input').value='';$('join-error').textContent='';
+    setTimeout(()=>$('join-input').focus(),100);
+  });
+
+  $('btn-join-go').addEventListener('click',joinRoom);
+  $('join-input').addEventListener('keyup',e=>{if(e.key==='Enter')joinRoom()});
+
+  function joinRoom(){
+    const code=$('join-input').value.toUpperCase().trim();
+    if(code.length!==4){$('join-error').textContent='Digite um código de 4 caracteres';return}
+    $('join-error').textContent='Conectando...';
+    cleanupPeer();isHost=false;
+
+    peer=new Peer(undefined,{debug:0});
+    peer.on('open',()=>{
+      conn=peer.connect('fb-'+code,{reliable:true});
+      wireConn(conn);
+    });
+    peer.on('error',err=>{
+      console.error('Join err:',err);
+      $('join-error').textContent='Sala não encontrada ou erro de conexão';
+    });
+  }
+
+  $('btn-create-cancel').addEventListener('click',()=>{cleanupPeer();show('lobby-screen')});
+  $('btn-join-cancel').addEventListener('click',()=>{cleanupPeer();show('lobby-screen')});
+  $('btn-dc-ok').addEventListener('click',()=>{cleanupPeer();$('dc-overlay').style.display='none';refreshMenu();show('menu-screen')});
+
+  function wireConn(c){
+    c.on('open',()=>{
+      const r=getRank(save.rp),sk=getSkin(save.skin);
+      c.send({type:'info',rank:r.name,rp:save.rp,c1:sk.c1,c2:sk.c2});
+      if(isHost)c.send({type:'mode',mode:onlineMode});
+    });
+    c.on('data',d=>handleData(d));
+    c.on('close',()=>{
+      if(game&&game.online){$('dc-overlay').style.display='flex';game.destroy();game=null}
+    });
+    c.on('error',err=>console.error('Conn err:',err));
+  }
+
+  function handleData(d){
+    if(!d||!d.type)return;
+    switch(d.type){
+      case'info':
+        oppInfo=d;
+        if(isHost)showVS();
+        break;
+      case'mode':
+        onlineMode=d.mode;
+        if(!isHost&&oppInfo)showVS();
+        break;
+      case'start':
+        startOnlineGame();
+        break;
+      case'shot':
+        if(game)game.applyRemoteShot(d);
+        break;
+    }
+  }
+
+  function showVS(){
+    show('vs-screen');
+    const myR=getRank(save.rp);
+    $('vs-n1').textContent='Você';$('vs-r1').textContent=myR.name;$('vs-r1').style.color=myR.color;
+    $('vs-n2').textContent=oppInfo?oppInfo.rank:'Oponente';
+    const oR=getRank(oppInfo?oppInfo.rp:0);
+    $('vs-r2').textContent=oR.name;$('vs-r2').style.color=oR.color;
+    $('vs-mode').textContent=onlineMode;
+
+    setTimeout(()=>{
+      if(isHost&&conn&&conn.open)conn.send({type:'start'});
+      startOnlineGame();
+    },2500);
+  }
+
+  function startOnlineGame(){
+    curMode=onlineMode;show('game-screen');
+    $('s1').textContent='0';$('s2').textContent='0';$('timer').textContent='03:00';
+    const myTeam=isHost?1:2;
+    $('t1n').textContent=isHost?'Você':'Oponente';
+    $('t2n').textContent=isHost?'Oponente':'Você';
+    $('turn').textContent='Vez do Vermelho';$('turn').style.borderLeft='3px solid var(--red)';
+
+    const abBtn=$('btn-ability');abBtn.textContent='⚡ Nenhuma';abBtn.disabled=true;
+
+    if(game)game.destroy();
+
+    const mySkin=getSkin(save.skin);
+    const oppSkin=oppInfo?{c1:oppInfo.c1,c2:oppInfo.c2}:{c1:'#3b82f6',c2:'#dbeafe'};
+
+    game=new Game($('game-canvas'),curMode,{online:true,myTeam:myTeam,isHost:isHost});
+
+    if(isHost){
+      game.playerSkin=mySkin;game.botSkin=oppSkin;
+    } else {
+      game.playerSkin=oppSkin;game.botSkin=mySkin;
+    }
+
+    game.onShot=data=>{if(conn&&conn.open)conn.send({type:'shot',i:data.i,vx:data.vx,vy:data.vy})};
+
+    game.onGoal=(tn,sc)=>{
+      $('s1').textContent=sc[0];$('s2').textContent=sc[1];
+      $('goal-who').textContent=tn===myTeam?'Você!':'Oponente!';
+      $('goal-overlay').style.display='flex';
+      setTimeout(()=>$('goal-overlay').style.display='none',1800);
+    };
+
+    game.onTime=tl=>{const m=Math.floor(tl/60),s=Math.floor(tl%60);$('timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`};
+
+    game.onTurn=tn=>{
+      $('turn').textContent=tn===myTeam?'Sua vez':'Vez do Oponente';
+      $('turn').style.borderLeft=`3px solid ${tn===1?'var(--red)':'var(--blue)'}`;
+    };
+
+    game.onEnd=sc=>{
+      const myS=myTeam===1?sc[0]:sc[1],opS=myTeam===1?sc[1]:sc[0];
+      const won=myS>opS;
+      const ce=won?30+Math.floor(Math.random()*20):5+Math.floor(Math.random()*5);
+      const re=won?25+Math.floor(Math.random()*15):-10;
+      save.coins+=ce;save.rp=Math.max(0,save.rp+re);
+      if(won)save.wins++;else save.losses++;persist();
+      $('go-title').textContent=won?'Vitória!':myS===opS?'Empate!':'Derrota!';
+      $('go-score').textContent=`${sc[0]} - ${sc[1]}`;
+      $('go-coins').textContent=`+${ce}`;$('go-coins').style.color='var(--gold)';
+      $('go-rp').textContent=re>=0?`+${re}`:`${re}`;$('go-rp').style.color=re>=0?'var(--green)':'var(--red)';
+      cleanupPeer();show('go-screen');
+    };
+
+    const origDraw=game.draw.bind(game);
+    game.draw=function(){origDraw();const pb=$('power-bar'),pf=$('power-fill');if(this.state==='aiming'){pb.style.display='flex';pf.style.width=`${this.power*100}%`}else{pb.style.display='none'}};
+    game.start();
   }
 
   refreshMenu();
