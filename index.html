@@ -393,8 +393,8 @@ class V2 {
 }
 
 class Body {
-  constructor(x,y,r,m){this.pos=new V2(x,y);this.vel=new V2();this.r=r;this.m=m||1;this.fric=0.94;this.frozen=false}
-  update(dt){if(this.frozen)return;this.pos=this.pos.add(this.vel.sc(dt));this.vel=this.vel.sc(this.fric);if(this.vel.len()<0.08)this.vel=new V2()}
+  constructor(x,y,r,m){this.pos=new V2(x,y);this.vel=new V2();this.r=r;this.m=m||1;this.fric=0.94;this.frozen=false;this.trail=[]}
+  update(dt){if(this.frozen)return;if(this.vel.len()>0.5){this.trail.push({x:this.pos.x,y:this.pos.y});if(this.trail.length>14)this.trail.shift()}this.pos=this.pos.add(this.vel.sc(dt));this.vel=this.vel.sc(this.fric);if(this.vel.len()<0.08){this.vel=new V2();this.trail.length=0}}
   moving(){return this.vel.len()>0.08}
 }
 
@@ -565,9 +565,9 @@ class Game {
 
   resetPos(){
     const p1=this.getForm(1),p2=this.getForm(2);
-    this.t1.forEach((b,i)=>{b.pos=new V2(p1[i].x,p1[i].y);b.vel=new V2();b.frozen=false});
-    this.t2.forEach((b,i)=>{b.pos=new V2(p2[i].x,p2[i].y);b.vel=new V2();b.frozen=false});
-    this.ball.pos=new V2(this.fw/2,this.fh/2);this.ball.vel=new V2();
+    this.t1.forEach((b,i)=>{b.pos=new V2(p1[i].x,p1[i].y);b.vel=new V2();b.frozen=false;b.trail.length=0});
+    this.t2.forEach((b,i)=>{b.pos=new V2(p2[i].x,p2[i].y);b.vel=new V2();b.frozen=false;b.trail.length=0});
+    this.ball.pos=new V2(this.fw/2,this.fh/2);this.ball.vel=new V2();this.ball.trail.length=0;
     this.curveActive=false;this.magnetActive=false;this.ghostActive=false;this.enemyFrozen=false;
   }
 
@@ -721,6 +721,18 @@ class Game {
   drawBtns(c,btns,skin,tn){
     for(const b of btns){
       const x=b.pos.x,y=b.pos.y,r=b.r;
+      if(b.trail.length>1){
+        const len=b.trail.length;
+        for(let i=0;i<len;i++){
+          const t=b.trail[i],pct=i/(len-1);
+          c.globalAlpha=pct*0.3;
+          const sz=r*(0.25+0.6*pct);
+          const g=c.createRadialGradient(t.x,t.y,0,t.x,t.y,sz);
+          g.addColorStop(0,skin.c1);g.addColorStop(1,'transparent');
+          c.beginPath();c.arc(t.x,t.y,sz,0,Math.PI*2);c.fillStyle=g;c.fill();
+        }
+        c.globalAlpha=1;
+      }
       if(b.frozen){c.globalAlpha=0.5}
       c.beginPath();c.arc(x+2,y+3,r,0,Math.PI*2);c.fillStyle='rgba(0,0,0,0.25)';c.fill();
       c.beginPath();c.arc(x,y,r,0,Math.PI*2);
@@ -735,11 +747,15 @@ class Game {
 
   drawBall(c){
     const x=this.ball.pos.x,y=this.ball.pos.y,r=this.ball.r,spd=this.ball.vel.len();
-    if(spd>2){
-      const n=Math.min(Math.floor(spd/2),5),dir=this.ball.vel.norm();
-      for(let i=1;i<=n;i++){
-        const tx=x-dir.x*i*6,ty=y-dir.y*i*6;
-        c.globalAlpha=0.15-i*0.025;c.beginPath();c.arc(tx,ty,r*(1-i*0.08),0,Math.PI*2);c.fillStyle='#fff';c.fill();
+    if(this.ball.trail.length>1){
+      const len=this.ball.trail.length;
+      for(let i=0;i<len;i++){
+        const t=this.ball.trail[i],pct=i/(len-1);
+        c.globalAlpha=pct*0.35;
+        const sz=r*(0.3+0.65*pct);
+        const g=c.createRadialGradient(t.x,t.y,0,t.x,t.y,sz);
+        g.addColorStop(0,'#fbbf24');g.addColorStop(0.6,'rgba(251,191,36,0.3)');g.addColorStop(1,'transparent');
+        c.beginPath();c.arc(t.x,t.y,sz,0,Math.PI*2);c.fillStyle=g;c.fill();
       }
       c.globalAlpha=1;
     }
