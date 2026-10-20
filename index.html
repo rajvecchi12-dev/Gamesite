@@ -291,44 +291,98 @@ class Body {
   moving(){return this.vel.len()>0.08}
 }
 
+class FX {
+  constructor(){this.particles=[];this.flashes=[];this.shake=0}
+  hit(x,y,power,color){
+    const n=6+Math.floor(power*10);
+    for(let i=0;i<n;i++){
+      const a=Math.random()*Math.PI*2,sp=1+Math.random()*3*power;
+      this.particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,color,r:1.5+Math.random()*2.5});
+    }
+    this.flashes.push({x,y,r:8+power*20,life:1});
+    this.shake=Math.min(this.shake+power*4,8);
+  }
+  wallHit(x,y){
+    for(let i=0;i<4;i++){
+      const a=Math.random()*Math.PI*2,sp=0.5+Math.random()*1.5;
+      this.particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,color:'#fff',r:1.5});
+    }
+  }
+  update(dt){
+    this.shake*=0.85;if(this.shake<0.2)this.shake=0;
+    for(const p of this.particles){p.x+=p.vx;p.y+=p.vy;p.vx*=0.92;p.vy*=0.92;p.life-=dt*3}
+    this.particles=this.particles.filter(p=>p.life>0);
+    for(const f of this.flashes)f.life-=dt*6;
+    this.flashes=this.flashes.filter(f=>f.life>0);
+  }
+  draw(c){
+    for(const f of this.flashes){c.globalAlpha=f.life*0.5;c.beginPath();c.arc(f.x,f.y,f.r*f.life,0,Math.PI*2);c.fillStyle='#fff';c.fill()}
+    c.globalAlpha=1;
+    for(const p of this.particles){c.globalAlpha=p.life;c.beginPath();c.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);c.fillStyle=p.color;c.fill()}
+    c.globalAlpha=1;
+  }
+}
+
 class Physics {
-  constructor(w,h,gh){this.w=w;this.h=h;this.gh=gh;this.bodies=[];this.ball=null}
+  constructor(w,h,gh){this.w=w;this.h=h;this.gh=gh;this.bodies=[];this.ball=null;this.fx=new FX()}
   add(b){this.bodies.push(b)}
   setBall(b){this.ball=b;this.add(b)}
   update(dt){
     for(const b of this.bodies)b.update(dt);
-    for(let iter=0;iter<3;iter++){
+    for(let iter=0;iter<5;iter++){
       for(let i=0;i<this.bodies.length;i++)
         for(let j=i+1;j<this.bodies.length;j++)
-          this.collide(this.bodies[i],this.bodies[j]);
+          this.collide(this.bodies[i],this.bodies[j],iter===0);
     }
     this.walls();
+    this.fx.update(dt);
   }
-  collide(a,b){
+  collide(a,b,doFx){
     const d=b.pos.sub(a.pos),dist=d.len(),minD=a.r+b.r;
-    if(dist>=minD||dist<0.01)return;
-    const n=d.norm(),overlap=minD-dist,tm=a.m+b.m;
-    const sepA=overlap*(b.m/tm)*1.05,sepB=overlap*(a.m/tm)*1.05;
-    if(!a.frozen)a.pos=a.pos.sub(n.sc(sepA));
-    if(!b.frozen)b.pos=b.pos.add(n.sc(sepB));
+    if(dist>=minD)return;
+    if(dist<0.1){b.pos=b.pos.add(new V2(minD,0));return}
+    const n=d.norm(),overlap=minD-dist+2,tm=a.m+b.m;
+    if(!a.frozen)a.pos=a.pos.sub(n.sc(overlap*(b.m/tm)));
+    if(!b.frozen)b.pos=b.pos.add(n.sc(overlap*(a.m/tm)));
     const rv=a.vel.sub(b.vel).dot(n);
-    if(rv>0)return;
-    const e=0.55,imp=-(1+e)*rv/tm;
+    if(rv>=0){
+      if(overlap>3){
+        const push=0.5;
+        if(!a.frozen)a.vel=a.vel.sub(n.sc(push));
+        if(!b.frozen)b.vel=b.vel.add(n.sc(push));
+      }
+      return;
+    }
+    const e=0.65,imp=-(1+e)*rv/tm;
     if(!a.frozen)a.vel=a.vel.add(n.sc(imp*b.m));
     if(!b.frozen)b.vel=b.vel.sub(n.sc(imp*a.m));
+    if(doFx){
+      const power=Math.min(Math.abs(rv)/15,1);
+      const isBall=a===this.ball||b===this.ball;
+      const mid=a.pos.add(b.pos).sc(0.5);
+      this.fx.hit(mid.x,mid.y,power,isBall?'#fbbf24':'#f87171');
+    }
   }
   walls(){
     const gT=(this.h-this.gh)/2,gB=gT+this.gh;
     for(const b of this.bodies){
       const isBall=b===this.ball;
-      if(b.pos.x-b.r<0){if(!(isBall&&b.pos.y>gT&&b.pos.y<gB)){b.pos.x=b.r;b.vel.x=Math.abs(b.vel.x)*0.4}}
-      if(b.pos.x+b.r>this.w){if(!(isBall&&b.pos.y>gT&&b.pos.y<gB)){b.pos.x=this.w-b.r;b.vel.x=-Math.abs(b.vel.x)*0.4}}
-      if(b.pos.y-b.r<0){b.pos.y=b.r;b.vel.y=Math.abs(b.vel.y)*0.4}
-      if(b.pos.y+b.r>this.h){b.pos.y=this.h-b.r;b.vel.y=-Math.abs(b.vel.y)*0.4}
+      if(b.pos.x-b.r<0){if(!(isBall&&b.pos.y>gT&&b.pos.y<gB)){
+        if(Math.abs(b.vel.x)>1)this.fx.wallHit(b.r,b.pos.y);
+        b.pos.x=b.r+1;b.vel.x=Math.abs(b.vel.x)*0.4}}
+      if(b.pos.x+b.r>this.w){if(!(isBall&&b.pos.y>gT&&b.pos.y<gB)){
+        if(Math.abs(b.vel.x)>1)this.fx.wallHit(this.w-b.r,b.pos.y);
+        b.pos.x=this.w-b.r-1;b.vel.x=-Math.abs(b.vel.x)*0.4}}
+      if(b.pos.y-b.r<0){
+        if(Math.abs(b.vel.y)>1)this.fx.wallHit(b.pos.x,b.r);
+        b.pos.y=b.r+1;b.vel.y=Math.abs(b.vel.y)*0.4}
+      if(b.pos.y+b.r>this.h){
+        if(Math.abs(b.vel.y)>1)this.fx.wallHit(b.pos.x,this.h-b.r);
+        b.pos.y=this.h-b.r-1;b.vel.y=-Math.abs(b.vel.y)*0.4}
       if(!isBall){
         const posts=[{x:0,y:gT},{x:0,y:gB},{x:this.w,y:gT},{x:this.w,y:gB}];
-        for(const p of posts){const dd=b.pos.sub(new V2(p.x,p.y)),di=dd.len(),mn=b.r+5;
-          if(di<mn&&di>0){const nn=dd.norm();b.pos=new V2(p.x,p.y).add(nn.sc(mn));const vn=b.vel.dot(nn);if(vn<0)b.vel=b.vel.sub(nn.sc(vn*1.3))}}
+        for(const p of posts){const dd=b.pos.sub(new V2(p.x,p.y)),di=dd.len(),mn=b.r+6;
+          if(di<mn&&di>0.1){const nn=dd.norm();b.pos=new V2(p.x,p.y).add(nn.sc(mn+1));const vn=b.vel.dot(nn);if(vn<0)b.vel=b.vel.sub(nn.sc(vn*1.4))}}
       }
     }
   }
@@ -501,6 +555,8 @@ class Game {
 
   draw(){
     const c=this.c,w=this.fw,h=this.fh;
+    const sk=this.ph.fx.shake;
+    if(sk>0.5){c.save();c.translate((Math.random()-.5)*sk,(Math.random()-.5)*sk)}
     c.fillStyle='#1a8c35';c.fillRect(0,0,w,h);
     const sw=w/14;for(let i=0;i<14;i++){if(i%2===0){c.fillStyle='rgba(0,0,0,0.03)';c.fillRect(i*sw,0,sw,h)}}
     const gT=(h-this.goalH)/2;
@@ -521,11 +577,14 @@ class Game {
     this.drawBtns(c,this.t2,this.botSkin,2);
     this.drawBall(c);
 
+    this.ph.fx.draw(c);
+
     if(this.state==='aiming'&&this.sel&&this.as&&this.ae)this.drawArrow(c);
     if(this.state==='waiting'&&this.team===1){
       const col='rgba(239,68,68,0.4)';
       for(const b of this.t1){c.beginPath();c.arc(b.pos.x,b.pos.y,b.r+6,0,Math.PI*2);c.strokeStyle=col;c.lineWidth=2;c.setLineDash([5,5]);c.stroke();c.setLineDash([])}
     }
+    if(sk>0.5)c.restore();
   }
 
   drawBtns(c,btns,skin,tn){
@@ -544,13 +603,22 @@ class Game {
   }
 
   drawBall(c){
-    const x=this.ball.pos.x,y=this.ball.pos.y,r=this.ball.r;
+    const x=this.ball.pos.x,y=this.ball.pos.y,r=this.ball.r,spd=this.ball.vel.len();
+    if(spd>2){
+      const n=Math.min(Math.floor(spd/2),5),dir=this.ball.vel.norm();
+      for(let i=1;i<=n;i++){
+        const tx=x-dir.x*i*6,ty=y-dir.y*i*6;
+        c.globalAlpha=0.15-i*0.025;c.beginPath();c.arc(tx,ty,r*(1-i*0.08),0,Math.PI*2);c.fillStyle='#fff';c.fill();
+      }
+      c.globalAlpha=1;
+    }
     c.beginPath();c.arc(x+1,y+2,r,0,Math.PI*2);c.fillStyle='rgba(0,0,0,0.2)';c.fill();
     c.beginPath();c.arc(x,y,r,0,Math.PI*2);
     const g=c.createRadialGradient(x-2,y-2,0,x,y,r);g.addColorStop(0,'#fff');g.addColorStop(1,'#ccc');c.fillStyle=g;c.fill();
     c.strokeStyle='#444';c.lineWidth=.7;
     for(const a of [0,72,144,216,288]){const rad=a*Math.PI/180;c.beginPath();c.arc(x+Math.cos(rad)*r*.5,y+Math.sin(rad)*r*.5,r*.18,0,Math.PI*2);c.stroke()}
     c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.strokeStyle='#aaa';c.lineWidth=1;c.stroke();
+    if(spd>5){c.beginPath();c.arc(x,y,r+3,0,Math.PI*2);c.strokeStyle=`rgba(251,191,36,${Math.min(spd/20,0.5)})`;c.lineWidth=2;c.stroke()}
   }
 
   drawArrow(c){
